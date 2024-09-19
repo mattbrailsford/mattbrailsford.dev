@@ -6,23 +6,20 @@ export function blogPostsLoader(): Loader {
     return {
         name: "blog-posts-loader",
         load: async ({ store, logger, parseData, meta, generateDigest }): Promise<void> => {
-
             const posts = await getAllPosts();
-
             store.clear();
-
             for (const item of posts) {
-                
                 const data = await parseData({
                     id: item.slug,
                     data: item,
                 });
-
                 const digest = generateDigest(data);
-
                 store.set({
                     id: item.slug,
                     data,
+                    rendered: {
+                        html: item.content,
+                    },
                     digest
                 });
             }
