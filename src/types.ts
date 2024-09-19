@@ -1,4 +1,4 @@
-﻿export interface Post {
+﻿export interface Post extends Record<string, unknown> {
     id: string
     slug: string
     title: string

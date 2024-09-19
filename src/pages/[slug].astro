@@ -1,0 +1,21 @@
+﻿
+---
+import { getCollection, getEntry } from "astro:content";
+
+export async function getStaticPaths() {
+    const posts = await getCollection('blogPosts');
+    return posts.map(post => ({
+        params: {
+            slug: post.data.slug
+        }
+    }))
+}
+
+const post = await getEntry('blogPosts', Astro.params.slug || '');
+
+if (!post) {
+    return Astro.redirect('/404');
+}
+
+---
+<h1>{post.data.title}</h1>
