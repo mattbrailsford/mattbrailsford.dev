@@ -17,6 +17,8 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
     // Render content
     const content = await renderMarkdown(markdownContent);
     
+    const seriesNode = node.labels.edges.find((x:any) => x.node.name.startsWith('series/'));
+    
     // Generate post model
     return {
         id: node.id,
@@ -29,7 +31,10 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
         githubUrl: node.url,
         number: node.number,
         tags: node.labels.edges.filter((x:any) => x.node.name.startsWith('tag/')).map((x:any) => x.node.name.replace('tag/', '')),
-        series: node.labels.edges.find((x:any) => x.node.name.startsWith('series/'))?.node.name.replace('series/', '')
+        series: seriesNode && {
+            id: seriesNode.node.name.replace('series/', ''),
+            name: seriesNode.node.description
+        }
     };
 }
 

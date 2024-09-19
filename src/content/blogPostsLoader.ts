@@ -35,7 +35,10 @@ export function blogPostsLoader(): Loader {
             githubUrl: z.string(),
             number: z.number(),
             tags: z.array(z.string()),
-            series: z.string().optional(),
+            series: z.object({
+                id: z.string(),
+                name: z.string(),
+            }).optional(),
         })
     };
 }

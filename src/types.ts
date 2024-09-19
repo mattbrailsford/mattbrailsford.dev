@@ -9,7 +9,7 @@
     githubUrl: string
     number: number
     tags: string[]
-    series?: string
+    series?: PostSeries
 }
 
 export interface PostList {
@@ -21,4 +21,9 @@ export interface PageInfo {
     startCursor: string
     hasNextPage: boolean
     endCursor: string
+}
+
+export interface PostSeries {
+    id: string
+    name: string
 }

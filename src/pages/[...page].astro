@@ -26,7 +26,7 @@ const { page } = Astro.props;
 					))}
 					<br />
 					{post.data.series && (
-						<text><a href={`series/${post.data.series}`}>{post.data.series}</a> </text>
+						<text><a href={`series/${post.data.series.id}`}>{post.data.series.name}</a> </text>
 						<br />
 					)}
 					{post.data.date}

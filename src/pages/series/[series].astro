@@ -6,15 +6,18 @@ export async function getStaticPaths() {
     const series = [...new Set(posts.filter(post => post.data.series).map(post => post.data.series))];
     return series.map(s => ({
         params: {
-            series:s 
+            series:s.id
+        },
+        props: {
+            seriesName: s.name
         }
     }))
 }
 
-const posts = await getCollection('blogPosts', (post) => post.data.series === Astro.params.series);
+const posts = await getCollection('blogPosts', (post) => post.data.series?.id === Astro.params.series);
 ---
 
-<h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.params.series}</h1>
+<h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.props.seriesName}</h1>
 <ul>
     {posts.map(post => (
         <li>

@@ -25,6 +25,7 @@ export default gql`
                 node {
                   id
                   name
+                  description
                   color
                 }
               }
