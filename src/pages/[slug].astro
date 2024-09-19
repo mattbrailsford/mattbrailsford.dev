@@ -11,11 +11,12 @@ export async function getStaticPaths() {
     }))
 }
 
-const post = await getEntry('blogPosts', Astro.params.slug || '');
+const post = (await getEntry('blogPosts', Astro.params.slug || '')).data;
 
 if (!post) {
     return Astro.redirect('/404');
 }
 
 ---
-<h1>{post.data.title}</h1>
+<h1 class="post-title text-3xl lg:text-5xl lg:pl-0 font-bold">{post.title}</h1>
+<div class="post-content mt-12 text-lg" set:html={post.content} />
