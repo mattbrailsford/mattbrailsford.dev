@@ -1,15 +1,14 @@
 ﻿import client from '../graphql/client'
 import { mapPost } from '../utils'
-import GET_POSTS_QUERY from '../graphql/getPostsQuery'
+import SEARCH_POSTS_QUERY from '../graphql/searchPostsQuery'
 import type { Post, PostList } from '../types'
 
 const getPosts = async (limit = 50, after?: string): Promise<PostList> => {
 
     const { data, error } = await client.query(
-        GET_POSTS_QUERY,
+        SEARCH_POSTS_QUERY,
         {
-            owner: import.meta.env.GITHUB_REPO_OWNER,
-            repo: import.meta.env.GITHUB_REPO_NAME,
+            query: `repo:${import.meta.env.GITHUB_REPO_OWNER}/${import.meta.env.GITHUB_REPO_NAME} -label:state/draft`,
             limit,
             after: after || null,
         },
@@ -27,12 +26,12 @@ const getPosts = async (limit = 50, after?: string): Promise<PostList> => {
     }
 
     const posts =  await Promise.all(
-        data.repository.discussions.edges.map(mapPost),
+        data.search.edges.map(mapPost),
     )
 
     return {
         posts,
-        pageInfo: data.repository.discussions.pageInfo,
+        pageInfo: data.search.pageInfo,
     }
 
 }
@@ -47,7 +46,5 @@ const getPostsRecursive = async (limit: number, after?: string): Promise<Post[]>
 
 export const getAllPosts = async (): Promise<Post[]> => {
     const allPosts = await getPostsRecursive(100);
-    return allPosts
-        .filter(post => !post.isDraft)
-        .sort((a, b) => b.date.getTime() - a.date.getTime());
+    return allPosts.sort((a, b) => b.date.getTime() - a.date.getTime());
 }

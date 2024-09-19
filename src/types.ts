@@ -10,7 +10,6 @@
     number: number
     tags: string[]
     series?: string
-    isDraft: boolean
 }
 
 export interface PostList {
