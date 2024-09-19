@@ -4,7 +4,6 @@ import { getCollection, getEntry } from "astro:content";
 export async function getStaticPaths() {
     const posts = await getCollection('blogPosts');
     const series = [...new Set(posts.filter(post => post.data.series).map(post => post.data.series))];
-    console.log(series);
     return series.map(s => ({
         params: {
             series:s 
