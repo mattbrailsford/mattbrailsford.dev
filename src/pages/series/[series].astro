@@ -12,14 +12,12 @@ export async function getStaticPaths() {
     }))
 }
 
-const posts = await getCollection('blogPosts');
-const postsInSeries = posts.filter(post => post.data.series === Astro.params.series);
-
+const posts = await getCollection('blogPosts', (post) => post.data.series === Astro.params.series);
 ---
 
 <h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.params.series}</h1>
 <ul>
-    {postsInSeries.map(post => (
+    {posts.map(post => (
         <li>
             <a href={`/${post.data.slug}`}>{post.data.title}</a>
             <br />

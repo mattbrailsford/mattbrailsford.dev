@@ -11,14 +11,12 @@ export async function getStaticPaths() {
     }))
 }
 
-const posts = await getCollection('blogPosts');
-const postsWithTag = posts.filter(post => post.data.tags.includes(Astro.params.tag));
-
+const posts = await getCollection('blogPosts', (post) => post.data.tags.includes(Astro.params.tag));
 ---
 
 <h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.params.tag}</h1>
 <ul>
-    {postsWithTag.map(post => (
+    {posts.map(post => (
         <li>
             <a href={`/${post.data.slug}`}>{post.data.title}</a>
             <br />
@@ -31,4 +29,4 @@ const postsWithTag = posts.filter(post => post.data.tags.includes(Astro.params.t
             <br />
         </li>
     ))}
-</ul>`;
+</ul>
