@@ -12,6 +12,7 @@ import type { Post } from './types';
 export async function mapPost({ node }: { node: any }): Promise<Post> {
     const { data: frontmatter, content: markdownContent } = matter(node.body);
 
+    // Render content
     const content = (await unified()
         .use(remarkParse)
         .use(remarkRehype, {
@@ -25,8 +26,10 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
         })
         .process(markdownContent)).toString();
 
+    // Extract date
     const date = new Date(frontmatter.published ?? node.createdAt);
     
+    // Generate post model
     return {
         id: node.id,
         slug: frontmatter.slug ?? slugify(node.title, { lower: true }),

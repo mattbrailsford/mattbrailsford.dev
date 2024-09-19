@@ -1,6 +1,6 @@
 ﻿
 ---
-import { getCollection, getEntry, render } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Layout from "../layouts/Default.astro";
 
 export async function getStaticPaths() {
@@ -12,20 +12,16 @@ export async function getStaticPaths() {
     }))
 }
 
-const postEntry = await getEntry('blogPosts', Astro.params.slug || '');
-const post = postEntry?.data;
+const post = (await getEntry('blogPosts', Astro.params.slug || '')).data;
 
 if (!post) {
     return Astro.redirect('/404');
 }
 
-const { Content } = await render(postEntry);
 ---
 <Layout title={post.title} description={post?.description}>
     <article>
         <h1 class="post-title text-3xl lg:text-5xl lg:pl-0 font-bold">{post.title}</h1>
-        <div class="post-content mt-12 text-lg">
-            <Content />
-        </div>
+        <div class="post-content mt-12 text-lg" set:html={post.content} />
     </article>
 </Layout>
