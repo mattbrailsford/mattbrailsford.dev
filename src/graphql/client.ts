@@ -6,7 +6,7 @@ export default createClient({
         return {
             headers: {
                 authorization: `Bearer ${import.meta.env.GITHUB_API_KEY}`,
-                'user-agent': 'mattbrailsford.dev'
+                'user-agent': `${import.meta.env.DOMAIN}`
             },
         };
     },
