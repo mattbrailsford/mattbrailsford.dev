@@ -8,12 +8,15 @@ export async function getStaticPaths() {
     return posts.map(post => ({
         params: {
             slug: post.data.slug
+        },
+        props: {
+            post: post.data
         }
     }))
 }
 
-const post = (await getEntry('blogPosts', Astro.params.slug || '')).data;
-
+const { post } = Astro.props;
+ 
 if (!post) {
     return Astro.redirect('/404');
 }
