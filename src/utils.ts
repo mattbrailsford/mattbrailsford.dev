@@ -10,10 +10,31 @@ import slugify from 'slugify';
 import type { Post } from './types';
 
 export async function mapPost({ node }: { node: any }): Promise<Post> {
+    
+    // Extract frontmatter and content
     const { data: frontmatter, content: markdownContent } = matter(node.body);
 
     // Render content
-    const content = (await unified()
+    const content = await renderMarkdown(markdownContent);
+    
+    // Generate post model
+    return {
+        id: node.id,
+        slug: frontmatter.slug ?? slugify(node.title, { lower: true }),
+        title: node.title,
+        description: frontmatter && frontmatter.description,
+        content,
+        date: new Date(frontmatter.published ?? node.createdAt),
+        readingTime: readingTime(content, 250).text,
+        githubUrl: node.url,
+        number: node.number,
+        tags: node.labels.edges.filter((x:any) => x.node.name.startsWith('tag/')).map((x:any) => x.node.name.replace('tag/', '')),
+        series: node.labels.edges.find((x:any) => x.node.name.startsWith('series/'))?.node.name.replace('series/', '')
+    };
+}
+
+export async function renderMarkdown(markdownContent: string): Promise<string> {
+    return (await unified()
         .use(remarkParse)
         .use(remarkRehype, {
             allowDangerousHtml: true,
@@ -25,24 +46,6 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
             languages: { },
         })
         .process(markdownContent)).toString();
-
-    // Extract date
-    const date = new Date(frontmatter.published ?? node.createdAt);
-    
-    // Generate post model
-    return {
-        id: node.id,
-        slug: frontmatter.slug ?? slugify(node.title, { lower: true }),
-        title: node.title,
-        description: frontmatter && frontmatter.description,
-        content,
-        date,
-        readingTime: readingTime(content, 250).text,
-        githubUrl: node.url,
-        number: node.number,
-        tags: node.labels.edges.filter((x:any) => x.node.name.startsWith('tag/')).map((x:any) => x.node.name.replace('tag/', '')),
-        series: node.labels.edges.find((x:any) => x.node.name.startsWith('series/'))?.node.name.replace('series/', '')
-    };
 }
 
 export function formatDate(date: Date) {

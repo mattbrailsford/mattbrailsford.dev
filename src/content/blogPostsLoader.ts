@@ -5,7 +5,7 @@ import { z } from "astro:content";
 export function blogPostsLoader(): Loader {
     return {
         name: "blog-posts-loader",
-        load: async ({ store, logger, parseData, meta, generateDigest }): Promise<void> => {
+        load: async ({ store, parseData, generateDigest }): Promise<void> => {
             const posts = await getAllPosts();
             store.clear();
             for (const item of posts) {
