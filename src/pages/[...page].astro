@@ -1,31 +1,21 @@
 ---
+import Layout from '../layouts/Default.astro';
 import { getCollection } from 'astro:content';
 import Pagination from "../components/Pagination.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 export async function getStaticPaths({ paginate }) {
 	const posts = await getCollection('blogPosts');
 	return paginate(posts, {
-		pageSize: 5,
+		pageSize: 10,
 	})
 }
 
 const { page } = Astro.props;
-const pathname = new URL(Astro.request.url).pathname.split('/');
-const firstPath = pathname[1];
-
-console.log(page)
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head> 
-	<body>
-		<h1>Astro</h1>
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+	<div>
 		<ul>
 			{page.data.map(post => (
 				<li>
@@ -45,17 +35,17 @@ console.log(page)
 				</li>
 			))}
 		</ul>
-		{page.lastPage !== page.firstPage ? (
+		{page.lastPage > 1 ? (
 			<div class="mt-4">
 				<Pagination length={page.lastPage}
 					currentUrl={page.url.current}
 					currentPage={page.currentPage}
-					firstUrl={`/${firstPath}`}
+					firstUrl={`/`}
 					prevUrl={page.url.prev}
 					nextUrl={page.url.next}
-					lastUrl={`/${firstPath}/${page.lastPage}`}
+					lastUrl={`/${page.lastPage}`}
 				/>
 			</div>
 		) : null}
-	</body>
-</html>
+	</div>
+</Layout>
