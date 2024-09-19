@@ -13,4 +13,4 @@ This is the repository for my personal blog [mattbrailsford.dev](https://mattbra
 [MIT](LICENSE.md)
 
 ## Credit
-This project is highly inspired by [Matteo Rigon's GitHub discussions powered blog](https://reego.dev/). I've taken a lot of inspiration from [his setup](https://github.com/reegodev/reego.dev) and adapted it to suit my needs.
+This project is highly inspired by [Matteo Rigon's GitHub discussions powered blog](https://reego.dev/). I've learnt a lot from [his setup](https://github.com/reegodev/reego.dev) and adapted it to suit my needs.
