@@ -1,4 +1,4 @@
-﻿import type { Loader } from 'astro/loaders';
+﻿import type { Loader, LoaderContext } from 'astro/loaders';
 import { getAllPosts } from "../repository/getAllPosts.ts";
 import { z } from "astro:content";
 
@@ -17,6 +17,9 @@ export function blogPostsLoader(): Loader {
                 store.set({
                     id: item.slug,
                     data,
+                    rendered: {
+                        html: item.content,
+                    },
                     digest
                 });
             }
