@@ -46,5 +46,8 @@ const getPostsRecursive = async (limit: number, after?: string): Promise<Post[]>
 }
 
 export const getAllPosts = async (): Promise<Post[]> => {
-    return (await getPostsRecursive(100)).sort((a, b) => b.date.getTime() - a.date.getTime());
+    const allPosts = await getPostsRecursive(100);
+    return allPosts
+        .filter(post => !post.isDraft)
+        .sort((a, b) => b.date.getTime() - a.date.getTime());
 }

@@ -42,6 +42,7 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
         number: node.number,
         tags: node.labels.edges.filter((x:any) => x.node.name.startsWith('tag/')).map((x:any) => x.node.name.replace('tag/', '')),
         series: node.labels.edges.find((x:any) => x.node.name.startsWith('series/'))?.node.name.replace('series/', ''),
+        isDraft: node.labels.edges.includes((x:any) => x.node.name === 'state/draft')
     };
 }
 
