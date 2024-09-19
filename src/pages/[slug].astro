@@ -19,7 +19,7 @@ if (!post) {
 }
 
 ---
-<Layout title={post.title} description={post?.description}>
+<Layout title={post.title + ' | ' + import.meta.env.DOMAIN } description={post?.description}>
     <article>
         <h1 class="post-title text-3xl lg:text-5xl lg:pl-0 font-bold">{post.title}</h1>
         <div class="post-content mt-12 text-lg" set:html={post.content} />
