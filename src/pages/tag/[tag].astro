@@ -1,0 +1,34 @@
+﻿---
+import { getCollection, getEntry } from "astro:content";
+
+export async function getStaticPaths() {
+    const posts = await getCollection('blogPosts');
+    const tags = [...new Set(posts.flatMap(post => post.data.tags))];
+    return tags.map(tag => ({
+        params: {
+            tag
+        }
+    }))
+}
+
+const posts = await getCollection('blogPosts');
+const postsWithTag = posts.filter(post => post.data.tags.includes(Astro.params.tag));
+
+---
+
+<h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.params.tag}</h1>
+<ul>
+    {postsWithTag.map(post => (
+        <li>
+            <a href={`/${post.data.slug}`}>{post.data.title}</a>
+            <br />
+            {post.data.tags.map(tag => (
+                <text><span>{tag}</span> </text>
+            ))}
+            <br />
+            {post.data.date}
+            <br />
+            <br />
+        </li>
+    ))}
+</ul>`;

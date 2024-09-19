@@ -19,9 +19,13 @@ const posts = await getCollection('blogPosts');
 					<a href={`/${post.data.slug}`}>{post.data.title}</a>
 					<br />
 					{post.data.tags.map(tag => (
-						<text><span>{tag}</span> </text>
+						<text><a href={`tag/${tag}`}>{tag}</a> </text>
 					))}
 					<br />
+					{post.data.series && (
+						<text><a href={`series/${post.data.series}`}>{post.data.series}</a> </text>
+						<br />
+					)}
 					{post.data.date}
 					<br />
 					<br />
