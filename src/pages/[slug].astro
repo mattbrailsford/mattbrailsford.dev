@@ -24,7 +24,7 @@ if (!post) {
 }
 
 ---
-<Layout title={post.title + ' | ' + import.meta.env.DOMAIN } description={post?.description}>
+<Layout title={post.title} description={post?.description}>
     <article class="w-full py-8">
         <FormattedDate date={post.date} class="text-sm text-slate-300 font-bold" />
         <h1 class="font-display text-3xl md:text-6xl text-black font-extrabold mb-2">{post.title}</h1>
@@ -32,6 +32,22 @@ if (!post) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg> {post.readingTime}</p>
         <TagList tags={post.tags} />
-        <div class="prose prose-slate prose-xl prose-headings:font-extrabold prose-headings:text-black prose-inline-code:bg-gray-100 prose-img:mx-auto prose-img:rounded prose-li:marker:font-medium prose-li:marker:text-slate-700 hover:prose-a:text-pink-500 mt-8" set:html={post.content} />
+        <div class="prose prose-slate prose-xl prose-headings:font-extrabold prose-headings:text-black prose-headings:mb-3 prose-inline-code:bg-gray-100 prose-img:mx-auto prose-img:rounded prose-li:marker:font-medium prose-li:marker:text-slate-700 hover:prose-a:text-pink-500 mt-8 prose-code:leading-3" set:html={post.content} />
     </article>
+    <aside class="py-12"> 
+        <script 
+                is:inline
+                src="https://giscus.app/client.js"
+                data-repo="mattbrailsford/mattbrailsford.dev"
+                data-repo-id="R_kgDOMyW45A"
+                data-mapping="number"
+                data-term={post.number}
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-theme="light"
+                data-lang="en"
+                crossorigin="anonymous"
+                async
+        ></script>
+    </aside>
 </Layout>
