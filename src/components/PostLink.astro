@@ -1,0 +1,16 @@
+﻿---
+import type { Post } from '../types'
+import FormattedDate from "./FormattedDate.astro";
+import TagList from "./TagList.astro";
+
+export type Props = { post: Post }
+const { post } = Astro.props;
+---
+<div>
+    <FormattedDate date={post.data.date} class="text-sm text-slate-300 font-bold" />
+    <h3 class="font-display text-3xl md:text-5xl text-black font-extrabold mb-2"><a href={`/${post.data.slug}`} class="hover:text-pink-500">{post.data.title}</a></h3>
+    <p class="mb-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 inline-block">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg> {post.data.readingTime}</p>
+    <TagList tags={post.data.tags} />
+</div>

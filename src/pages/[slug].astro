@@ -2,6 +2,8 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import Layout from "../layouts/Default.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+import TagList from "../components/TagList.astro";
 
 export async function getStaticPaths() {
     const posts = await getCollection('blogPosts');
@@ -23,8 +25,13 @@ if (!post) {
 
 ---
 <Layout title={post.title + ' | ' + import.meta.env.DOMAIN } description={post?.description}>
-    <article>
-        <h1 class="post-title text-3xl lg:text-5xl lg:pl-0 font-bold">{post.title}</h1>
-        <div class="post-content mt-12 text-lg" set:html={post.content} />
+    <article class="w-full py-8">
+        <FormattedDate date={post.date} class="text-sm text-slate-300 font-bold" />
+        <h1 class="font-display text-3xl md:text-6xl text-black font-extrabold mb-2">{post.title}</h1>
+        <p class="mb-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 inline-block">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg> {post.readingTime}</p>
+        <TagList tags={post.tags} />
+        <div class="prose prose-slate prose-xl prose-headings:font-extrabold prose-headings:text-black prose-inline-code:bg-gray-100 prose-img:mx-auto prose-img:rounded prose-li:marker:font-medium prose-li:marker:text-slate-700 hover:prose-a:text-pink-500 mt-8" set:html={post.content} />
     </article>
 </Layout>

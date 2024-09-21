@@ -1,0 +1,19 @@
+﻿---
+const origin = import.meta.env.DOMAIN
+const defaultImage = origin + '/social-picture.jpg'
+
+export type Props = { title: string; description: string; image?: string; }
+const { title, description, image } = Astro.props;
+const { search, pathname } = Astro.url;
+---
+<title>{title === import.meta.env.DOMAIN ? title : `${title} | ${import.meta.env.DOMAIN}`}</title>
+<meta name="description" content="{description}">
+
+<meta property="og:title" content={title === import.meta.env.DOMAIN ? title : `${title} | ${import.meta.env.DOMAIN}`}>
+<meta property="og:description" content={description}>
+<meta property="og:image" content={image || defaultImage}>
+<meta property="og:url" content={`${origin}${pathname}${search ? search : ''}`}>
+<meta property="og:type" content="website" />
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@mattbrailsford">
