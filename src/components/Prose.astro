@@ -1,5 +1,5 @@
 ﻿---
-export type Props = { content: string; }
+export type Props = { content?: string; }
 const { content } = Astro.props;
 
 import hljs from 'highlight.js/lib/common';
@@ -27,4 +27,7 @@ hljs.registerLanguage('json', json);
     prose-li:marker:font-medium 
     prose-li:marker:text-slate-700 
     hover:prose-a:text-pink-500 
-    mt-8" set:html={content} />
+    mt-8">
+    {content && (<div set:html={content}></div>)}
+    <slot />
+</div>
