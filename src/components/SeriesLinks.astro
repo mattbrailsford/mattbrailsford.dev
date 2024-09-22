@@ -8,8 +8,9 @@ posts.reverse();
 ---
 {posts.length > 1 && (
     <ul class={"series-links border rounded-l " + klass}>
+        <li class="bg-gray-50 p-4 font-bold"><a href={`/series/${series.id}`} class="hover:text-pink-500">{series.name}</a></li>
         {posts.map((post) => (
-            <li class={`flex border-b last-of-type:border-0 p-4 ${ post.data.id === currentSlug ? 'current' : '' }`}>
+            <li class={`item flex border-b last-of-type:border-0 p-4 ${ post.data.id === currentSlug ? 'current' : '' }`}>
                 {post.data.id === currentSlug ? (
                     <span class=" font-bold">{post.data.title}</span>
                 ) : (
@@ -24,10 +25,10 @@ posts.reverse();
     .series-links {
         counter-reset: series-link;
     }
-    .series-links li {
+    .series-links li.item {
         counter-increment: series-link;
     }
-    .series-links li:before {
+    .series-links li.item:before {
         content: counter(series-link) "";
         background-color:  #f5f5f5;
         display: inline-flex;
@@ -39,7 +40,7 @@ posts.reverse();
         border-radius: 9999px;
         margin-right: 10px;
     }
-    .series-links li.current:before {
+    .series-links li.item.current:before {
         background-color: rgb(236 72 153 / var(--tw-text-opacity));
         color: white;
     }
