@@ -45,11 +45,8 @@ export async function renderMarkdown(markdownContent: string): Promise<string> {
             allowDangerousHtml: true,
         })
         .use(rehypeRaw)
-        .use(rehypeStringify, )
-        .use(rehypeHighlight, {
-            ignoreMissing: true,
-            languages: { },
-        })
+        .use(rehypeStringify)
+        .use(rehypeHighlight)
         .process(markdownContent)).toString();
 }
 

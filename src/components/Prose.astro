@@ -1,0 +1,18 @@
+﻿---
+export type Props = { content: string; }
+const { content } = Astro.props;
+---
+<div class="prose 
+    prose-slate 
+    prose-xl 
+    prose-headings:font-extrabold 
+    prose-headings:text-black 
+    prose-headings:mb-3 
+    prose-headings:leading-[1.2]
+    prose-inline-code:bg-gray-100 
+    prose-img:mx-auto 
+    prose-img:rounded 
+    prose-li:marker:font-medium 
+    prose-li:marker:text-slate-700 
+    hover:prose-a:text-pink-500 
+    mt-8" set:html={content} />

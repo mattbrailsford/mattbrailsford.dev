@@ -4,6 +4,18 @@ import Layout from "../layouts/Default.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import TagList from "../components/TagList.astro";
 import type {Post} from "../types";
+import Prose from "../components/Prose.astro";
+
+import hljs from 'highlight.js/lib/common';
+import 'highlight.js/styles/atom-one-dark.css';
+
+import javascript from 'highlight.js/lib/languages/javascript';
+import csharp from 'highlight.js/lib/languages/csharp';
+import json from 'highlight.js/lib/languages/json';
+
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('csharp', csharp);
+hljs.registerLanguage('json', json);
 
 interface Props {
     post: Post;
@@ -33,12 +45,12 @@ const ogImageUrl = new URL(`/open-graph/${post.slug}.png`, Astro.site)
 <Layout title={post.title} description={post?.description} image={ogImageUrl.toString()}>
     <article class="w-full py-8">
         <FormattedDate date={post.date} class="text-sm text-slate-300 font-bold" />
-        <h1 class="font-display text-3xl md:text-6xl text-black font-extrabold mb-2">{post.title}</h1>
+        <h1 class="halftone ont-display text-3xl text-black font-extrabold mb-2 md:text-6xl md:leading-[1.2]">{post.title}</h1>
         <p class="mb-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 inline-block">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg> {post.readingTime}</p>
         <TagList tags={post.tags} />
-        <div class="prose prose-slate prose-xl prose-headings:font-extrabold prose-headings:text-black prose-headings:mb-3 prose-inline-code:bg-gray-100 prose-img:mx-auto prose-img:rounded prose-li:marker:font-medium prose-li:marker:text-slate-700 hover:prose-a:text-pink-500 mt-8 prose-code:leading-3" set:html={post.content} />
+        <Prose content={post.content} />
     </article>
     <div class="py-12"> 
         <script 
