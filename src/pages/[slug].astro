@@ -1,11 +1,15 @@
-﻿
----
+﻿---
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Default.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import TagList from "../components/TagList.astro";
+import {Post} from "../types";
 
-export async function getStaticPaths() {
+interface Props {
+    post: Post;
+}
+    
+export const getStaticPaths = (async () => {
     const posts = await getCollection('blogPosts');
     return posts.map(post => ({
         params: {
@@ -15,9 +19,9 @@ export async function getStaticPaths() {
             post: post.data
         }
     }))
-}
+});
 
-const { post } = Astro.props;
+const { post } = Astro.props as Props;
  
 if (!post) {
     return Astro.redirect('/404');

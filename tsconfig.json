@@ -5,7 +5,8 @@
     "**/*"
   ],
   "exclude": [
-    "dist"
+    "dist",
+    "lib"
   ],
   "compilerOptions": {
     "outDir": "dist"
