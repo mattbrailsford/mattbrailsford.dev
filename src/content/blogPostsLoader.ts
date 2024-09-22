@@ -1,4 +1,4 @@
-﻿import type { Loader, LoaderContext } from 'astro/loaders';
+﻿import type { Loader } from 'astro/loaders';
 import { getAllPosts } from "../repository/getAllPosts.ts";
 import { z } from "astro:content";
 
@@ -24,7 +24,7 @@ export function blogPostsLoader(): Loader {
                 });
             }
         },
-        schema: z.object({
+        schema: () => z.object({
             id: z.string(),
             slug: z.string(),
             title: z.string(),
