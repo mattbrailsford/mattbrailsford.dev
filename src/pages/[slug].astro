@@ -5,18 +5,7 @@ import FormattedDate from "../components/FormattedDate.astro";
 import TagList from "../components/TagList.astro";
 import type {Post} from "../types";
 import Prose from "../components/Prose.astro";
-
-import hljs from 'highlight.js/lib/common';
-import 'highlight.js/styles/atom-one-dark.css';
-
-import javascript from 'highlight.js/lib/languages/javascript';
-import csharp from 'highlight.js/lib/languages/csharp';
-import json from 'highlight.js/lib/languages/json';
 import SeriesLinks from "../components/SeriesLinks.astro";
-
-hljs.registerLanguage('javascript', javascript);
-hljs.registerLanguage('csharp', csharp);
-hljs.registerLanguage('json', json);
 
 interface Props {
     post: Post;
