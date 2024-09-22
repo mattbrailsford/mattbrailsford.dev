@@ -1,5 +1,5 @@
 ﻿---
-import {PostSeries} from "../types";
+import type {PostSeries} from "../types";
 import {getCollection} from "astro:content";
 export type Props = { series: PostSeries; currentSlug: string; class:string; }
 const { series, currentSlug, class: klass } = Astro.props;
