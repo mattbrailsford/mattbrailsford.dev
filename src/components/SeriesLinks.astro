@@ -1,0 +1,46 @@
+﻿---
+import {PostSeries} from "../types";
+import {getCollection} from "astro:content";
+export type Props = { series: PostSeries; currentSlug: string; class:string; }
+const { series, currentSlug, class: klass } = Astro.props;
+const posts = await getCollection('blogPosts', (p) => p.data.series && p.data.series.id === series.id);
+posts.reverse();
+---
+{posts.length > 1 && (
+    <ul class={"series-links border rounded-l " + klass}>
+        {posts.map((post) => (
+            <li class={`flex border-b last-of-type:border-0 p-4 ${ post.data.id === currentSlug ? 'current' : '' }`}>
+                {post.data.id === currentSlug ? (
+                    <span class=" font-bold">{post.data.title}</span>
+                ) : (
+                    <a href={`/${post.data.slug}`} class="hover:text-pink-500">{post.data.title}</a>
+                )}
+            </li>
+        ))}
+    </ul>    
+)}
+
+<style>
+    .series-links {
+        counter-reset: series-link;
+    }
+    .series-links li {
+        counter-increment: series-link;
+    }
+    .series-links li:before {
+        content: counter(series-link) "";
+        background-color:  #f5f5f5;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 9999px;
+        margin-right: 10px;
+    }
+    .series-links li.current:before {
+        background-color: rgb(236 72 153 / var(--tw-text-opacity));
+        color: white;
+    }
+</style>
