@@ -1,5 +1,5 @@
 ﻿---
-const origin = import.meta.env.DOMAIN
+const origin = Astro.site.origin;
 const defaultImage = origin + '/social-picture.jpg'
 
 export type Props = { title: string; description: string; image?: string; }

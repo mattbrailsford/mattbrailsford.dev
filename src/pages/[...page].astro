@@ -3,7 +3,6 @@ import Layout from '../layouts/Default.astro';
 import { getCollection } from 'astro:content';
 import Pagination from "../components/Pagination.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
-import ForattedDate from "../components/ForattedDate.astro";
 import PostLink from "../components/PostLink.astro";
 
 export async function getStaticPaths({ paginate }) {
