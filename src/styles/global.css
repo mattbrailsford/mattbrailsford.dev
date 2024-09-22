@@ -12,3 +12,7 @@
     opacity: .2;
     z-index: -1;
 }
+
+pre code.hljs {
+    border-radius: 0.75rem;
+}
