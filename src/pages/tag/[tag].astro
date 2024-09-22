@@ -1,5 +1,8 @@
 ﻿---
-import { getCollection, getEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import PostLink from "../../components/PostLink.astro";
+import {SITE_DESCRIPTION, SITE_TITLE} from "../../consts";
+import Layout from "../../layouts/Default.astro";
 
 export async function getStaticPaths() {
     const posts = await getCollection('blogPosts');
@@ -13,20 +16,13 @@ export async function getStaticPaths() {
 
 const posts = await getCollection('blogPosts', (post) => post.data.tags.includes(Astro.params.tag));
 ---
-
-<h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.params.tag}</h1>
-<ul>
-    {posts.map(post => (
-        <li>
-            <a href={`/${post.data.slug}`}>{post.data.title}</a>
-            <br />
-            {post.data.tags.map(tag => (
-                <text><span>{tag}</span> </text>
-            ))}
-            <br />
-            {post.data.date}
-            <br />
-            <br />
-        </li>
-    ))}
-</ul>
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+    <h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.params.tag}</h1>
+    <ul>
+        {posts.map(post => (
+            <li class="py-8 border-b">
+                <PostLink post={post.data} />
+            </li>
+        ))}
+    </ul>
+</Layout>

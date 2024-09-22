@@ -2,7 +2,7 @@
     id: string
     slug: string
     title: string
-    description: string
+    description?: string
     content: string
     date: Date
     readingTime: string

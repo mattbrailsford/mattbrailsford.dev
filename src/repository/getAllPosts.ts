@@ -5,7 +5,7 @@ import type { Post, PostList } from '../types'
 
 const getPosts = async (limit = 50, after?: string): Promise<PostList> => {
 
-    const { data, error } = await client.query(
+    const { data } = await client.query(
         SEARCH_POSTS_QUERY,
         {
             query: `repo:${import.meta.env.GITHUB_REPO_OWNER}/${import.meta.env.GITHUB_REPO_NAME} -label:state/draft`,

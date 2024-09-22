@@ -1,35 +1,39 @@
 ﻿---
-import { getCollection, getEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import {SITE_DESCRIPTION, SITE_TITLE} from "../../consts";
+import PostLink from "../../components/PostLink.astro";
+import Layout from "../../layouts/Default.astro";
 
 export async function getStaticPaths() {
     const posts = await getCollection('blogPosts');
-    const series = [...new Set(posts.filter(post => post.data.series).map(post => post.data.series))];
+    const series = posts
+        .filter(post => post.data.series)
+        .map(post => post.data.series!)
+        .reduce((acc, cur) => {
+            if (acc.every(x => x.id !== cur.id)) {
+                acc.push(cur);
+            }
+            return acc;
+        }, [])
     return series.map(s => ({
         params: {
-            series:s.id
+            series: s.id
         },
         props: {
-            seriesName: s.name
+            series: s
         }
     }))
 }
 
 const posts = await getCollection('blogPosts', (post) => post.data.series?.id === Astro.params.series);
 ---
-
-<h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.props.seriesName}</h1>
-<ul>
-    {posts.map(post => (
-        <li>
-            <a href={`/${post.data.slug}`}>{post.data.title}</a>
-            <br />
-            {post.data.tags.map(tag => (
-                <text><span>{tag}</span> </text>
-            ))}
-            <br />
-            {post.data.date}
-            <br />
-            <br />
-        </li>
-    ))}
-</ul>
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+    <h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{Astro.props.series!.name}</h1>
+    <ul>
+        {posts.map(post => (
+            <li class="py-8 border-b">
+                <PostLink post={post.data} />
+            </li>
+        ))}
+    </ul>
+</Layout>

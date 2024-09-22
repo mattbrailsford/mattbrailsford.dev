@@ -4,15 +4,17 @@ import { getCollection } from 'astro:content';
 import Pagination from "../components/Pagination.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import PostLink from "../components/PostLink.astro";
+import {Post} from "../types";
+import {Page} from "astro";
 
 export async function getStaticPaths({ paginate }) {
 	const posts = await getCollection('blogPosts');
-	return paginate(posts, {
+	return paginate(posts.map(x => x.data), {
 		pageSize: 10,
 	})
 }
 
-const { page } = Astro.props;
+const { page } = <{ page:Page<Post> }>Astro.props;
 ---
 
 <Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>

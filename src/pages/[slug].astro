@@ -1,6 +1,6 @@
 ﻿
 ---
-import { getCollection, getEntry } from "astro:content";
+import { getCollection } from "astro:content";
 import Layout from "../layouts/Default.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import TagList from "../components/TagList.astro";
@@ -26,7 +26,7 @@ if (!post) {
 const ogImageUrl = new URL(`/open-graph/${post.slug}.png`, Astro.site)
 
 ---
-<Layout title={post.title} description={post?.description} image={ogImageUrl}>
+<Layout title={post.title} description={post?.description} image={ogImageUrl.toString()}>
     <article class="w-full py-8">
         <FormattedDate date={post.date} class="text-sm text-slate-300 font-bold" />
         <h1 class="font-display text-3xl md:text-6xl text-black font-extrabold mb-2">{post.title}</h1>
