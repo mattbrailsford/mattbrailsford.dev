@@ -1,9 +1,12 @@
-﻿import { unified } from 'unified';
+﻿import {type Plugin, unified} from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
+import remarkGfm from 'remark-gfm';
+import { default as remarkEmbedderDefault , type RemarkEmbedderOptions} from '@remark-embedder/core';
+import oembedTransformer from '@remark-embedder/transformer-oembed'
 import matter from 'gray-matter';
 import { readingTime } from 'reading-time-estimator';
 import slugify from 'slugify';
@@ -39,6 +42,7 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
 }
 
 export async function renderMarkdown(markdownContent: string): Promise<string> {
+    const remarkEmbedder = (remarkEmbedderDefault as unknown as { default: Plugin<[RemarkEmbedderOptions]> }).default;
     return (await unified()
         .use(remarkParse)
         .use(remarkRehype, {
@@ -47,6 +51,8 @@ export async function renderMarkdown(markdownContent: string): Promise<string> {
         .use(rehypeRaw)
         .use(rehypeStringify)
         .use(rehypeHighlight)
+        .use(remarkGfm)
+        .use(remarkEmbedder, { transformers: [oembedTransformer] })
         .process(markdownContent)).toString();
 }
 
