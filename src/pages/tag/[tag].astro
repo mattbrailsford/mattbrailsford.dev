@@ -22,7 +22,7 @@ const { tag } = Astro.params as Params;
 const posts = await getCollection('blogPosts', (post) => post.data.tags.includes(tag));
 ---
 <Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
-    <h1 class="halftone ont-display text-3xl text-black font-extrabold mb-2 md:text-6xl md:leading-[1.2]">#{tag}</h1>
+    <h1 class="halftone font-display text-3xl text-black font-extrabold mb-2 md:text-6xl md:leading-[1.2]">#{tag}</h1>
     <ul>
         {posts.map(post => (
             <li class="py-8 border-b">

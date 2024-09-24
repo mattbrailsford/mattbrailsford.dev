@@ -6,8 +6,8 @@ const isAbout = pathname.startsWith('/about');
 ---
 
 <header class="py-8 top-0 left-0 right-0 z-10 flex items-center justify-between">
-    <div class="font-extrabold text-2xl text-black">
-        <a href="/" class="logo hover:text-white">{import.meta.env.DOMAIN}</a>
+    <div class="font-display font-extrabold text-2xl text-black">
+        <a href="/" class="logo hover:text-pink-500">{import.meta.env.DOMAIN}</a>
     </div>
     <nav class="">
         <ul class="space-x-4 main-menu">
@@ -25,6 +25,7 @@ const isAbout = pathname.startsWith('/about');
     .logo {
         position: relative;
     }
+    /*
     .logo:after {
         content: "";
         position: absolute;
@@ -39,6 +40,7 @@ const isAbout = pathname.startsWith('/about');
     .logo:hover:after {
         height: calc(100% - 4px);
     }
+    */
     .main-menu .active {
         @apply font-medium underline;
         text-underline-offset: 4px;

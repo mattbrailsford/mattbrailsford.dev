@@ -14,9 +14,9 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
-				fontFamily: {
-					sans: ['Red Hat Display', ...defaultTheme.fontFamily.sans],
-				},
+				sans: ['Nunito Variable', ...defaultTheme.fontFamily.sans],
+				serif: ['Aleo Variable', ...defaultTheme.fontFamily.serif],
+				display: ['Rubik Variable', ...defaultTheme.fontFamily.sans],
 			},
 			typography: {
 				DEFAULT: { css: disabledCss },
