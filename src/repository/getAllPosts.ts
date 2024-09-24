@@ -8,7 +8,7 @@ const getPosts = async (limit = 50, after?: string): Promise<PostList> => {
     const { data } = await client.query(
         SEARCH_POSTS_QUERY,
         {
-            query: `repo:${import.meta.env.GITHUB_REPO_OWNER}/${import.meta.env.GITHUB_REPO_NAME} -label:state/draft`,
+            query: `repo:${import.meta.env.GITHUB_REPO_OWNER}/${import.meta.env.GITHUB_REPO_NAME} category:"Blog Post" -label:state/draft`,
             limit,
             after: after || null,
         },

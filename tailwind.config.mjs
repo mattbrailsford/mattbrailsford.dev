@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import TailwindTypography from '@tailwindcss/typography';
+import defaultTheme from 'tailwindcss/defaultTheme'
 
 const plugin = require('tailwindcss/plugin');
 
@@ -13,8 +14,9 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: ['Red Hat Display'],
-				display: ['Source Sans 3'],
+				fontFamily: {
+					sans: ['Red Hat Display', ...defaultTheme.fontFamily.sans],
+				},
 			},
 			typography: {
 				DEFAULT: { css: disabledCss },
