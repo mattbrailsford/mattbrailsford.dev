@@ -8,10 +8,12 @@ import 'highlight.js/styles/atom-one-dark.css';
 import javascript from 'highlight.js/lib/languages/javascript';
 import csharp from 'highlight.js/lib/languages/csharp';
 import json from 'highlight.js/lib/languages/json';
+import powershell from 'highlight.js/lib/languages/powershell';
 
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('csharp', csharp);
 hljs.registerLanguage('json', json);
+hljs.registerLanguage('powershell', powershell);
 
 ---
 <div class="prose 
@@ -25,8 +27,11 @@ hljs.registerLanguage('json', json);
     prose-inline-code:bg-gray-100 
     prose-img:mx-auto 
     prose-img:rounded 
+    prose-img:border
+    prose-img:border-gray-200
     prose-li:marker:font-medium 
     prose-li:marker:text-slate-700 
+    prose-a:break-words
     hover:prose-a:text-pink-500 
     mt-8">
     {content && (<div set:html={content}></div>)}
