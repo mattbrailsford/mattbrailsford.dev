@@ -1,13 +1,17 @@
 ﻿---
 import { formatDate } from "../utils";
+import SocialLinks from "./SocialLinks.astro";
 
 const year = new Date().getFullYear()
 const now = formatDate(new Date())
 ---
-<footer class="mt-8 py-4 text-center flex flex-col md:flex-row justify-center md:space-x-4 space-y-4 md:space-y-0 text-sm text-zinc-500">
-    <span>Copyright © {year}.</span>
-    <span>Static rendered on {now}.</span>
-    <a target="_blank" class="underline" href="https://github.com/mattbrailsford/mattbrailsford.dev" rel="noopener">
-        View source
-    </a>
+<footer class="mt-8 py-4 flex flex-col items-center text-sm text-slate-400">
+    <SocialLinks class="mb-4 mx-auto" />
+    <div class="text-center flex flex-col md:flex-row justify-center md:space-x-4 space-y-1 md:space-y-0">
+        <span>Copyright © {year}.</span>
+        <span>Static rendered on {now}.</span>
+        <a target="_blank" class="underline" href="https://github.com/mattbrailsford/mattbrailsford.dev" rel="noopener">
+            View source
+        </a>
+    </div>
 </footer>
