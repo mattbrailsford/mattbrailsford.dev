@@ -23,9 +23,9 @@ const { page } = Astro.props as Props
 
 <Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
 	<div>
-		<ul>
+		<ul class="-mt-7 md:mt-0">
 			{page.data.map(post => (
-				<li class="py-8 border-b">
+				<li class="py-7 border-b md:py-8">
 					<PostLink post={post} />
 				</li>
 			))}

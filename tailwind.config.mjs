@@ -14,9 +14,8 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: ['Nunito Variable', ...defaultTheme.fontFamily.sans],
-				serif: ['Aleo Variable', ...defaultTheme.fontFamily.serif],
-				display: ['Rubik Variable', ...defaultTheme.fontFamily.sans],
+				sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'],
+				display: ['Rubik Variable', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'],
 			},
 			typography: {
 				DEFAULT: { css: disabledCss },
