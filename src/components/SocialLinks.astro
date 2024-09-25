@@ -1,5 +1,5 @@
 ﻿---
-export type Props = { string; class:string; }
+export type Props = { class:string; }
 const { class: klass } = Astro.props;
 ---
 <ul class={`flex space-x-2 md:justify-center ${klass}`}>
