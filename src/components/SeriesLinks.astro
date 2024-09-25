@@ -31,8 +31,8 @@ posts.reverse();
 <script>
     class SeriesLinks extends HTMLElement {
         connectedCallback() {
-            const toggleRow = this.querySelector('.toggle');
-            const toggleLink = toggleRow.querySelector('a');
+            const toggleRow = this.querySelector('.toggle')!;
+            const toggleLink = toggleRow.querySelector('a')!;
             toggleLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 toggleRow.classList.toggle('hidden');
