@@ -33,7 +33,7 @@ const ogImageUrl = new URL(`/open-graph/${post.slug}.png`, Astro.site)
 
 ---
 <Layout title={post.title} description={post?.description} image={ogImageUrl.toString()}>
-    <article class="w-full md:py-8">
+    <article class="w-full py-7 md:py-8">
         <FormattedDate date={post.date} class="text-sm text-slate-300 uppercase font-bold" />
         <h1 class="halftone font-display text-4xl text-black font-bold mb-2 md:text-6xl md:leading-[1.1]">{post.title}</h1>
         <p class="mb-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 inline-block">
