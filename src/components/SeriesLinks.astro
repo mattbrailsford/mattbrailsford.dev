@@ -6,21 +6,48 @@ const { series, currentSlug, class: klass } = Astro.props;
 const posts = await getCollection('blogPosts', (p) => p.data.series && p.data.series.id === series.id);
 posts.reverse();
 ---
-{posts.length > 1 && (
-    <ul class={"series-links border rounded-l " + klass}>
-        <li class="bg-gray-50 p-4 font-bold"><a href={`/series/${series.id}`} class="hover:text-pink-500">{series.name}</a></li>
-        {posts.map((post) => (
-            <li class={`item flex border-b last-of-type:border-0 p-4 ${ post.data.id === currentSlug ? 'current' : '' }`}>
-                {post.data.id === currentSlug ? (
-                    <span class=" font-bold">{post.data.title}</span>
-                ) : (
-                    <a href={`/${post.data.slug}`} class="hover:text-pink-500">{post.data.title}</a>
-                )}
-            </li>
-        ))}
-    </ul>    
-)}
+<series-links>
+    {posts.length > 1 && (
+        <ul class={"series-links border rounded-l " + klass}>
+            <li class="bg-gray-50 p-4 font-bold"><a href={`/series/${series.id}`} class="hover:text-pink-500">{series.name}</a></li>
+            {posts.map((post, idx) => (
+                <>
+                    {posts.length > 5 && idx === 2 && (
+                        <li class="toggle flex border-b last-of-type:border-0 p-4"><a href='#' class="hover:text-pink-500">{(posts.length - 4)} more parts...</a></li>
+                    )}
+                    <li class={`item flex border-b last-of-type:border-0 p-4 ${ post.data.id === currentSlug ? 'current' : '' } ${ posts.length > 5 && idx > 1 && idx < posts.length - 2 ? 'visibly-hidden' : '' }`}>
+                        {post.data.id === currentSlug ? (
+                                <span class="font-bold">{post.data.title}</span>
+                        ) : (
+                                <a href={`/${post.data.slug}`} class="hover:text-pink-500">{post.data.title}</a>
+                        )}
+                    </li>
+                </>
+            ))}
+        </ul>
+    )}
+</series-links>
 
+<script>
+    class SeriesLinks extends HTMLElement {
+        connectedCallback() {
+            const toggleRow = this.querySelector('.toggle');
+            const toggleLink = toggleRow.querySelector('a');
+            toggleLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleRow.classList.toggle('hidden');
+                const items = this.querySelectorAll('.item.visibly-hidden');
+                items.forEach((item) => {
+                    item.classList.toggle('visibly-hidden');
+                });
+            });
+        }
+    }
+    customElements.define('series-links', SeriesLinks);
+    
+    
+</script>
+        
 <style>
     .series-links {
         counter-reset: series-link;
@@ -28,8 +55,8 @@ posts.reverse();
     .series-links li.item {
         counter-increment: series-link;
     }
-    .series-links li.item:before {
-        content: counter(series-link) "";
+    .series-links li.item:before,
+    .series-links li.toggle:before{
         background-color:  #f5f5f5;
         display: inline-flex;
         align-items: center;
@@ -39,6 +66,12 @@ posts.reverse();
         height: 1.75rem;
         border-radius: 9999px;
         margin-right: 10px;
+    }
+    .series-links li.item:before {
+        content: counter(series-link) "";
+    }
+    .series-links li.toggle:before {
+        content: "...";
     }
     .series-links li.item.current:before {
         background-color: rgb(236 72 153 / var(--tw-text-opacity));

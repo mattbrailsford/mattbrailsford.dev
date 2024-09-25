@@ -17,3 +17,11 @@ pre code.hljs {
     border-radius: 0.75rem;
     line-height: 1.5;
 }
+
+.visibly-hidden {
+    position: absolute;
+    left: -9999px;
+    max-height: 0px;
+    overflow: hidden;
+    opacity: 0;
+}
