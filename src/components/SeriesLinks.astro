@@ -10,17 +10,17 @@ const currentIndex = posts.findIndex((post) => post.data.id === currentSlug);
 <series-links>
     {posts.length > 1 && (
         <ul class={"series-links border rounded-l " + klass}>
-            <li class="bg-gray-50 p-4 font-bold"><a href={`/series/${series.id}`} class="hover:text-pink-500">{series.name}</a></li>
+            <li class="bg-gray-50 p-4 font-bold"><a href={`/series/${series.id}`} class="hover:text-pink-500 transition-colors">{series.name}</a></li>
             {posts.map((post, idx) => (
                 <>
                     {posts.length > 5 && idx === 2 && (
-                        <li class={`toggle flex border-b last-of-type:border-0 p-4 ${ currentIndex > 1 && currentIndex < posts.length - 2 ? 'current' : '' }`}><a href='#' class="hover:text-pink-500">{(posts.length - 4)} more parts...</a></li>
+                        <li class={`toggle flex border-b last-of-type:border-0 p-4 ${ currentIndex > 1 && currentIndex < posts.length - 2 ? 'current' : '' }`}><a href='#' class="hover:text-pink-500 transition-colors">{(posts.length - 4)} more parts...</a></li>
                     )}
                     <li class={`item flex border-b last-of-type:border-0 p-4 ${ currentIndex === idx ? 'current' : '' } ${ posts.length > 5 && idx > 1 && idx < posts.length - 2 ? 'visibly-hidden' : '' }`}>
                         {post.data.id === currentSlug ? (
                                 <span>{post.data.title}</span>
                         ) : (
-                                <a href={`/${post.data.slug}`} class="hover:text-pink-500">{post.data.title}</a>
+                                <a href={`/${post.data.slug}`} class="hover:text-pink-500 transition-colors">{post.data.title}</a>
                         )}
                     </li>
                 </>
