@@ -6,6 +6,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import PostLink from "../components/PostLink.astro";
 import type {Post} from "../types";
 import type {Page} from "astro";
+import Intro from "../components/Intro.astro";
 
 interface Props {
 	page: Page<Post>;
@@ -22,6 +23,9 @@ const { page } = Astro.props as Props
 ---
 
 <Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+	{page.currentPage === 1 && (
+		<Intro />
+	)}
 	<div>
 		<ul>
 			{page.data.map(post => (
