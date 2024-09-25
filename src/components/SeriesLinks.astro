@@ -5,6 +5,7 @@ export type Props = { series: PostSeries; currentSlug: string; class:string; }
 const { series, currentSlug, class: klass } = Astro.props;
 const posts = await getCollection('blogPosts', (p) => p.data.series && p.data.series.id === series.id);
 posts.reverse();
+const currentIndex = posts.findIndex((post) => post.data.id === currentSlug);
 ---
 <series-links>
     {posts.length > 1 && (
@@ -13,11 +14,11 @@ posts.reverse();
             {posts.map((post, idx) => (
                 <>
                     {posts.length > 5 && idx === 2 && (
-                        <li class="toggle flex border-b last-of-type:border-0 p-4"><a href='#' class="hover:text-pink-500">{(posts.length - 4)} more parts...</a></li>
+                        <li class={`toggle flex border-b last-of-type:border-0 p-4 ${ currentIndex > 1 && currentIndex < posts.length - 2 ? 'current' : '' }`}><a href='#' class="hover:text-pink-500">{(posts.length - 4)} more parts...</a></li>
                     )}
-                    <li class={`item flex border-b last-of-type:border-0 p-4 ${ post.data.id === currentSlug ? 'current' : '' } ${ posts.length > 5 && idx > 1 && idx < posts.length - 2 ? 'visibly-hidden' : '' }`}>
+                    <li class={`item flex border-b last-of-type:border-0 p-4 ${ currentIndex === idx ? 'current' : '' } ${ posts.length > 5 && idx > 1 && idx < posts.length - 2 ? 'visibly-hidden' : '' }`}>
                         {post.data.id === currentSlug ? (
-                                <span class="font-bold">{post.data.title}</span>
+                                <span>{post.data.title}</span>
                         ) : (
                                 <a href={`/${post.data.slug}`} class="hover:text-pink-500">{post.data.title}</a>
                         )}
@@ -73,7 +74,10 @@ posts.reverse();
     .series-links li.toggle:before {
         content: "...";
     }
-    .series-links li.item.current:before {
+    .series-links li.current {
+        font-weight: bold;
+    }
+    .series-links li.current:before {
         background-color: rgb(236 72 153 / var(--tw-text-opacity));
         color: white;
     }
