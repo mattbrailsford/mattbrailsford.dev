@@ -2,7 +2,7 @@
 const { length, currentUrl, currentPage, firstUrl, prevUrl, nextUrl, lastUrl } = Astro.props;
 const paginationList = Array.from({ length: length }, (_, i) => i + 1);
 ---
-<nav class="flex items-center justify-between px-4 sm:px-0">
+<nav class="flex items-center justify-between">
     <div class="-mt-px flex w-0 flex-1">
         <a href={prevUrl} class=`inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium ${prevUrl ? 'text-slate-500 hover:border-slate-300 hover:text-slate-700' : 'text-slate-300 disabled' }`>
             <svg class="mr-3 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
