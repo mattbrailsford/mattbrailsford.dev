@@ -1,19 +1,4 @@
-﻿.halftone {
-    position: relative;
-}
-.halftone:before {
-    content: "";
-    position: absolute;
-    left: -5%;
-    top: 20%;
-    width: 60%;
-    height: 60%;
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAR0lEQVQoU4XQWwoAIAgEwPXk1cmLDY0eaoI/7qCgAKjaCIp5kSjV+UQAWgYX4sUIHojbPfggD7rohiHaYYoMfpHBzj/9nj4AS7QUCgIegwgAAAAASUVORK5CYII=);
-    opacity: .2;
-    z-index: -1;
-}
-
-pre code.hljs {
+﻿pre code.hljs {
     border-radius: 0.75rem;
     line-height: 1.5;
 }
