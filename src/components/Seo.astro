@@ -7,7 +7,7 @@ const { title, description, image } = Astro.props;
 const { search, pathname } = Astro.url;
 ---
 <title>{title === import.meta.env.DOMAIN ? title : `${title} | ${import.meta.env.DOMAIN}`}</title>
-<meta name="description" content="{description}">
+<meta name="description" content={description}>
 
 <meta property="og:title" content={title === import.meta.env.DOMAIN ? title : `${title} | ${import.meta.env.DOMAIN}`}>
 <meta property="og:description" content={description}>
