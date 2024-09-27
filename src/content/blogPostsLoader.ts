@@ -7,7 +7,7 @@ export function blogPostsLoader(): Loader {
         name: "blog-posts-loader",
         load: async ({ store, parseData, generateDigest, meta, logger }): Promise<void> => {
 
-            let lastModified = meta.get('last-modified');
+            let lastModified = undefined; //meta.get('last-modified');
             if (lastModified == 'Invalid Date') {
                 lastModified = undefined;
             }
@@ -15,15 +15,14 @@ export function blogPostsLoader(): Loader {
             logger.info(`Last Modified: ${lastModified}`);
             
             const posts = await getAllPosts(lastModified);
-            
-            let maxDate: Date = new Date(lastModified ?? 0);
-                        
-            // store.clear();
-            // Question: How to handle deleted posts?
-            
+
             logger.info(`Processing Posts: ${posts.length}`);
             
+            let maxDate: Date = new Date(lastModified ?? 0);
+            
             for (const item of posts) {
+
+                // Question: How to handle deleted posts?
                 
                 const data = await parseData({
                     id: item.id,
