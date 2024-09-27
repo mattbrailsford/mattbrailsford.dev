@@ -5,12 +5,12 @@ import SocialLinks from "./SocialLinks.astro";
 const year = new Date().getFullYear()
 const now = formatDate(new Date())
 ---
-<footer class="mt-8 py-4 flex flex-col items-center text-sm text-slate-400">
-    <SocialLinks class="mb-4 mx-auto" />
-    <div class="text-center flex flex-col md:flex-row justify-center md:space-x-4 space-y-1 md:space-y-0">
+<footer class="mt-16 flex flex-col">
+    <SocialLinks class="mb-8 mx-auto" />
+    <div class="bg-black text-white text-center text-sm py-4 flex flex-col justify-center md:flex-row md:space-x-4 md:space-y-0">
         <span>Copyright © {year}.</span>
         <span>Static rendered on {now}.</span>
-        <a target="_blank" class="underline" href="https://github.com/mattbrailsford/mattbrailsford.dev" rel="noopener">
+        <a target="_blank" class="underline transition-colors hover:text-pink-500" href="https://github.com/mattbrailsford/mattbrailsford.dev" rel="noopener">
             View source
         </a>
     </div>

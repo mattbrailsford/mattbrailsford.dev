@@ -13,12 +13,10 @@ const { title, description, image } = Astro.props;
     <link rel="alternate" type="application/rss+xml" title={ SITE_TITLE } href="/rss" />
 </head>
 <body class="font-sans font-normal text-slate-700 tracking-normal">
-<div class="flex flex-col justify-between min-h-screen max-w-3xl mx-auto px-4">
-    <main>
-        <Header />
+    <Header />
+    <main class="flex flex-col justify-between min-h-screen max-w-3xl mx-auto px-4">
         <slot />
-        <Footer />
     </main>
-</div>
+    <Footer />
 </body>
 </html>
