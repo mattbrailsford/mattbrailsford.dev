@@ -1,10 +1,12 @@
 ﻿---
 import type {PostSeries} from "../types";
 import {getCollection} from "astro:content";
+import {sortPostsDateAsc} from "../utils";
+
 export type Props = { series: PostSeries; currentSlug: string; class:string; }
+
 const { series, currentSlug, class: klass } = Astro.props;
-const posts = await getCollection('blogPosts', (p) => p.data.series && p.data.series.id === series.id);
-posts.reverse();
+const posts = (await getCollection('blogPosts', (p) => p.data.series && p.data.series.id === series.id)).sort(sortPostsDateAsc);
 const currentIndex = posts.findIndex((post) => post.data.id === currentSlug);
 ---
 <series-links>
