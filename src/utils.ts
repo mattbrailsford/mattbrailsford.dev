@@ -29,7 +29,9 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
         title: node.title,
         description: frontmatter && frontmatter.description,
         content,
-        date: new Date(frontmatter.published ?? node.createdAt),
+        created: new Date(node.createdAt),
+        updated: new Date(node.updatedAt),
+        published: new Date(frontmatter.published ?? node.createdAt),
         readingTime: readingTime(content, 250).text,
         githubUrl: node.url,
         number: node.number,
@@ -64,10 +66,10 @@ export function formatDate(date: Date) {
     })
 }
 
-export function sortPostsDateDesc(a: Post, b: Post) {
-    return b.date.getTime() - a.date.getTime();
+export function sortPostsPublishedDateDesc(a: Post, b: Post) {
+    return b.published.getTime() - a.published.getTime();
 }
 
-export function sortPostsDateAsc(a: Post, b: Post) {
-    return a.date.getTime() - b.date.getTime();
+export function sortPostsPublishedDateAsc(a: Post, b: Post) {
+    return a.published.getTime() - b.published.getTime();
 }

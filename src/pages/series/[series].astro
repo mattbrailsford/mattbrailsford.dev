@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import PostLink from "../../components/PostLink.astro";
 import Layout from "../../layouts/Default.astro";
 import type {PostSeries} from "../../types";
-import {sortPostsDateAsc} from "../../utils";
+import {sortPostsPublishedDateAsc} from "../../utils";
 
 interface Props {
     series: PostSeries
@@ -33,7 +33,7 @@ export const getStaticPaths = (async () => {
 const { series } = Astro.props as Props;
 const posts = (await getCollection('blogPosts', (post) => post.data.series?.id === series.id))
     .map(post => post.data)
-    .sort(sortPostsDateAsc);
+    .sort(sortPostsPublishedDateAsc);
 ---
 <Layout title={series!.name} description={`Blog posts in the ${series!.name} series`}>
     <!--<h1 class="text-3xl lg:text-5xl lg:pl-0 font-bold">{series!.name}</h1>-->

@@ -7,7 +7,7 @@ export type Props = { post: Post }
 const { post } = Astro.props;
 ---
 <div>
-    <FormattedDate date={post.date} class="text-sm text-slate-500 uppercase font-medium" />
+    <FormattedDate date={post.published} class="text-sm text-slate-500 uppercase font-medium" />
     <a href={`/${post.slug}`} class="block font-display text-3xl text-black font-extrabold mb-2 md:text-5xl md:leading-[1.1] hover:text-pink-500 md:transition-colors">{post.title}</a>
     <div class="mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 inline-block">

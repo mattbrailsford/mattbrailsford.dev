@@ -9,7 +9,7 @@ export const { getStaticPaths, GET } = OGImageRoute({
     pages: Object.fromEntries(posts.map(({ id, data }) => [id, data])),
     getImageOptions: (_, page) => ({
         title: page.title,
-        description: `${formatDate(page.date)} | ${page.readingTime}`,
+        description: `${formatDate(page.published)} | ${page.readingTime}`,
         bgGradient:[[255,255,255]],
         logo: {
             path: './public/logo-128.png',

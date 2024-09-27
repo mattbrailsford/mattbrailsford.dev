@@ -4,7 +4,9 @@
     title: string
     description?: string
     content: string
-    date: Date
+    created: Date
+    updated: Date
+    published: Date
     readingTime: string
     githubUrl: string
     number: number

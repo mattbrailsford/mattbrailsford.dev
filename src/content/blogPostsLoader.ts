@@ -7,7 +7,7 @@ export function blogPostsLoader(): Loader {
         name: "blog-posts-loader",
         load: async ({ store, parseData, generateDigest, meta }): Promise<void> => {
 
-            let lastModified = meta.get('last-modified');
+            let lastModified = undefined; // meta.get('last-modified');
             if (lastModified == 'Invalid Date') {
                 lastModified = undefined;
             }
@@ -41,8 +41,8 @@ export function blogPostsLoader(): Loader {
                     digest
                 });
                 
-                if (item.date > maxDate) {
-                    maxDate = item.date;
+                if (item.updated > maxDate) {
+                    maxDate = item.updated;
                 }
             }
             
@@ -56,7 +56,9 @@ export function blogPostsLoader(): Loader {
             title: z.string(),
             description: z.string().optional(),
             content: z.string(),
-            date: z.date(),
+            created: z.date(),
+            updated: z.date(),
+            published: z.date(),
             readingTime: z.string(),
             githubUrl: z.string(),
             number: z.number(),

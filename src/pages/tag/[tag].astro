@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import PostLink from "../../components/PostLink.astro";
 import Layout from "../../layouts/Default.astro";
-import {sortPostsDateDesc} from "../../utils";
+import {sortPostsPublishedDateDesc} from "../../utils";
 
 interface Params {
     tag: string 
@@ -21,7 +21,7 @@ export  const getStaticPaths = (async () => {
 const { tag } = Astro.params as Params;
 const posts = (await getCollection('blogPosts', (post) => post.data.tags.includes(tag)))
     .map(post => post.data)
-    .sort(sortPostsDateDesc);
+    .sort(sortPostsPublishedDateDesc);
 ---
 <Layout title={`${tag}`} description={`Blog posts in the tagged #${tag}`}>
     <div class="w-full py-7 md:py-8">

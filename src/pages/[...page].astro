@@ -7,7 +7,7 @@ import PostLink from "../components/PostLink.astro";
 import type {Post} from "../types";
 import type {Page} from "astro";
 import Intro from "../components/Intro.astro";
-import {sortPostsDateDesc} from "../utils";
+import {sortPostsPublishedDateDesc} from "../utils";
 
 interface Props {
 	page: Page<Post>;
@@ -15,7 +15,7 @@ interface Props {
 
 export const getStaticPaths = (async ({ paginate } : { paginate:any }) => {
 	const posts = await getCollection('blogPosts');
-	return paginate(posts.map(x => x.data).sort(sortPostsDateDesc), {
+	return paginate(posts.map(x => x.data).sort(sortPostsPublishedDateDesc), {
 		pageSize: 10,
 	})
 })
