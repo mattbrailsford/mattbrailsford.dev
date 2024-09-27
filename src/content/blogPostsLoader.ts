@@ -5,14 +5,14 @@ import { z } from "astro:content";
 export function blogPostsLoader(): Loader {
     return {
         name: "blog-posts-loader",
-        load: async ({ store, parseData, generateDigest, meta }): Promise<void> => {
+        load: async ({ store, parseData, generateDigest, meta, logger }): Promise<void> => {
 
             let lastModified = meta.get('last-modified');
             if (lastModified == 'Invalid Date') {
                 lastModified = undefined;
             }
-            
-            console.log('Last Modified:', lastModified);
+
+            logger.debug(`Last Modified: ${lastModified}`);
             
             const posts = await getAllPosts(lastModified);
             
@@ -21,7 +21,7 @@ export function blogPostsLoader(): Loader {
             // store.clear();
             // Question: How to handle deleted posts?
             
-            console.log('Processing Posts:', posts.length);
+            logger.debug(`Processing Posts: ${posts.length}`);
             
             for (const item of posts) {
                 
@@ -48,7 +48,7 @@ export function blogPostsLoader(): Loader {
             
             meta.set('last-modified', maxDate.toISOString().split('T')[0]);
 
-            console.log('New Last Modified:',  meta.get('last-modified'));
+            logger.debug(`New Last Modified: ${meta.get('last-modified')}`);
         },
         schema: () => z.object({
             id: z.string(),
