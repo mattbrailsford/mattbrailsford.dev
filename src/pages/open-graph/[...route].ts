@@ -12,7 +12,7 @@ export const { getStaticPaths, GET } = OGImageRoute({
         description: page.description ?? `${formatDate(page.date)} | ${page.readingTime}`,
         bgGradient:[[255,255,255]],
         logo: {
-            path: './public/mb.png',
+            path: './public/logo-128.png',
             size: [ 120, 120 ]
         },
         fonts: ['./src/fonts/RobotoSlab-ExtraBold.ttf'],
