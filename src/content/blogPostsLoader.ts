@@ -7,14 +7,21 @@ export function blogPostsLoader(): Loader {
         name: "blog-posts-loader",
         load: async ({ store, parseData, generateDigest, meta }): Promise<void> => {
 
-            const lastModified = meta.get('last-modified');
+            let lastModified = meta.get('last-modified');
+            if (lastModified == 'Invalid Date') {
+                lastModified = undefined;
+            }
+            
+            console.log('Last Modified:', lastModified);
             
             const posts = await getAllPosts(lastModified);
             
-            let maxDate = lastModified ? Date.parse(lastModified) : new Date(0);
+            let maxDate: Date = new Date(lastModified ?? 0);
                         
             // store.clear();
             // Question: How to handle deleted posts?
+            
+            console.log('Processing Posts:', posts.length);
             
             for (const item of posts) {
                 
@@ -39,7 +46,9 @@ export function blogPostsLoader(): Loader {
                 }
             }
             
-            meta.set('last-modified', new Date(maxDate).toLocaleString());
+            meta.set('last-modified', maxDate.toISOString().split('T')[0]);
+
+            console.log('New Last Modified:',  meta.get('last-modified'));
         },
         schema: () => z.object({
             id: z.string(),
