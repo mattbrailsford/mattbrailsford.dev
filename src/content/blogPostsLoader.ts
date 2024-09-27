@@ -2,20 +2,24 @@
 import { getAllPosts } from "../repository/getAllPosts.ts";
 import { z } from "astro:content";
 
+const incremental = true;
+
 export function blogPostsLoader(): Loader {
     return {
         name: "blog-posts-loader",
         load: async ({ store, parseData, generateDigest, meta, logger }): Promise<void> => {
 
-            let lastModified = undefined //meta.get('last-modified');
+            let lastModified = meta.get('last-modified');
             logger.info(`Last Modified: ${lastModified}`);
             
-            const posts = await getAllPosts(lastModified);
+            const posts = await getAllPosts(incremental ? lastModified : undefined);
             logger.info(`Processing Posts: ${posts.length}`);
             
             let maxDate: Date = new Date(lastModified ?? 0);
             
-            store.clear();
+            if (!incremental) {
+                store.clear();
+            }
             
             for (const item of posts) {
 
