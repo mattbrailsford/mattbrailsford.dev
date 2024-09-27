@@ -15,7 +15,7 @@ interface Props {
 
 export const getStaticPaths = (async ({ paginate } : { paginate:any }) => {
 	const posts = await getCollection('blogPosts');
-	return paginate(posts.sort(sortPostsDateDesc).map(x => x.data), {
+	return paginate(posts.map(x => x.data).sort(sortPostsDateDesc), {
 		pageSize: 10,
 	})
 })

@@ -11,7 +11,6 @@ import matter from 'gray-matter';
 import { readingTime } from 'reading-time-estimator';
 import slugify from 'slugify';
 import type { Post } from './types';
-import type {CollectionEntry} from "astro:content";
 
 export async function mapPost({ node }: { node: any }): Promise<Post> {
     
@@ -65,10 +64,10 @@ export function formatDate(date: Date) {
     })
 }
 
-export function sortPostsDateDesc(a: CollectionEntry<Post>, b: CollectionEntry<Post>) {
-    return b.data.date.getTime() - a.data.date.getTime();
+export function sortPostsDateDesc(a: Post, b: Post) {
+    return b.date.getTime() - a.date.getTime();
 }
 
-export function sortPostsDateAsc(a: CollectionEntry<Post>, b: CollectionEntry<Post>) {
-    return a.data.date.getTime() - b.data.date.getTime();
+export function sortPostsDateAsc(a: Post, b: Post) {
+    return a.date.getTime() - b.date.getTime();
 }

@@ -1,5 +1,5 @@
 ﻿---
-const { length, currentUrl, currentPage, firstUrl, prevUrl, nextUrl, lastUrl } = Astro.props;
+const { length, currentPage, prevUrl, nextUrl } = Astro.props;
 const paginationList = Array.from({ length: length }, (_, i) => i + 1);
 const PrevElement = prevUrl ? 'a': 'span';
 const NextElement = nextUrl ? 'a': 'span';

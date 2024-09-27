@@ -6,8 +6,10 @@ import {sortPostsDateAsc} from "../utils";
 export type Props = { series: PostSeries; currentSlug: string; class:string; }
 
 const { series, currentSlug, class: klass } = Astro.props;
-const posts = (await getCollection('blogPosts', (p) => p.data.series && p.data.series.id === series.id)).sort(sortPostsDateAsc);
-const currentIndex = posts.findIndex((post) => post.data.id === currentSlug);
+const posts = (await getCollection('blogPosts', (p) => p.data.series && p.data.series.id === series.id))
+    .map(p => p.data)
+    .sort(sortPostsDateAsc);
+const currentIndex = posts.findIndex((post) => post.slug === currentSlug);
 ---
 <series-links>
     {posts.length > 1 && (
@@ -19,10 +21,10 @@ const currentIndex = posts.findIndex((post) => post.data.id === currentSlug);
                         <li class={`toggle flex border-b last-of-type:border-0 p-4 ${ currentIndex > 1 && currentIndex < posts.length - 2 ? 'current' : '' }`}><a href='#' class="hover:text-pink-500 transition-colors">{(posts.length - 4)} more parts...</a></li>
                     )}
                     <li class={`item flex border-b last-of-type:border-0 p-4 ${ currentIndex === idx ? 'current' : '' } ${ posts.length > 5 && idx > 1 && idx < posts.length - 2 ? 'visibly-hidden' : '' }`}>
-                        {post.data.id === currentSlug ? (
-                                <span>{post.data.title}</span>
+                        {post.slug === currentSlug ? (
+                                <span>{post.title}</span>
                         ) : (
-                                <a href={`/${post.data.slug}`} class="hover:text-pink-500 transition-colors">{post.data.title}</a>
+                                <a href={`/${post.slug}`} class="hover:text-pink-500 transition-colors">{post.title}</a>
                         )}
                     </li>
                 </>
