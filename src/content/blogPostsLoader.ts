@@ -7,13 +7,15 @@ export function blogPostsLoader(): Loader {
         name: "blog-posts-loader",
         load: async ({ store, parseData, generateDigest, meta, logger }): Promise<void> => {
 
-            let lastModified = meta.get('last-modified');
+            let lastModified = undefined //meta.get('last-modified');
             logger.info(`Last Modified: ${lastModified}`);
             
             const posts = await getAllPosts(lastModified);
             logger.info(`Processing Posts: ${posts.length}`);
             
             let maxDate: Date = new Date(lastModified ?? 0);
+            
+            store.clear();
             
             for (const item of posts) {
 
