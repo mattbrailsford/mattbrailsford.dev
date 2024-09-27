@@ -7,7 +7,7 @@ export function blogPostsLoader(): Loader {
         name: "blog-posts-loader",
         load: async ({ store, parseData, generateDigest, meta }): Promise<void> => {
 
-            let lastModified = undefined; // meta.get('last-modified');
+            let lastModified = meta.get('last-modified');
             if (lastModified == 'Invalid Date') {
                 lastModified = undefined;
             }
