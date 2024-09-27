@@ -26,14 +26,14 @@ export function blogPostsLoader(): Loader {
             for (const item of posts) {
                 
                 const data = await parseData({
-                    id: item.slug,
+                    id: item.id,
                     data: item,
                 });
                 
                 const digest = generateDigest(data);
                 
                 store.set({
-                    id: item.slug,
+                    id: item.id,
                     data,
                     rendered: {
                         html: item.content,
