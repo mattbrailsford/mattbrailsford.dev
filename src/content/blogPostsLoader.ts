@@ -12,7 +12,7 @@ export function blogPostsLoader(): Loader {
                 lastModified = undefined;
             }
 
-            logger.debug(`Last Modified: ${lastModified}`);
+            logger.info(`Last Modified: ${lastModified}`);
             
             const posts = await getAllPosts(lastModified);
             
@@ -21,7 +21,7 @@ export function blogPostsLoader(): Loader {
             // store.clear();
             // Question: How to handle deleted posts?
             
-            logger.debug(`Processing Posts: ${posts.length}`);
+            logger.info(`Processing Posts: ${posts.length}`);
             
             for (const item of posts) {
                 
@@ -48,7 +48,7 @@ export function blogPostsLoader(): Loader {
             
             meta.set('last-modified', maxDate.toISOString().split('T')[0]);
 
-            logger.debug(`New Last Modified: ${meta.get('last-modified')}`);
+            logger.info(`New Last Modified: ${meta.get('last-modified')}`);
         },
         schema: () => z.object({
             id: z.string(),
