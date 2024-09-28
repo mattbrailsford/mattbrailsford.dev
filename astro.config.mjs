@@ -4,5 +4,8 @@ import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
   site: `https://mattbrailsford.dev`,
+  build: {
+    format: 'file'
+  },
   integrations: [tailwind()]
 });
