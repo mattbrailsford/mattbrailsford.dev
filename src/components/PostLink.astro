@@ -8,7 +8,7 @@ const { post } = Astro.props;
 ---
 <article>
     <FormattedDate date={post.published} class="text-sm text-slate-500 uppercase font-medium" />
-    <h2><a href={`/${post.slug}`} class="font-display text-3xl text-black font-extrabold mb-2 md:text-5xl md:leading-[1.1] hover:text-pink-500 md:transition-colors">{post.title}</a></h2>
+    <h2 class="font-display text-3xl text-black font-extrabold mb-2 md:text-5xl md:leading-[1.1] "><a href={`/${post.slug}`} class="hover:text-pink-500 md:transition-colors">{post.title}</a></h2>
     <p class="mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 inline-block">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
