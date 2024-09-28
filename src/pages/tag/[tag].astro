@@ -23,9 +23,9 @@ const posts = (await getCollection('blogPosts', (post) => post.data.tags.include
     .map(post => post.data)
     .sort(sortPostsPublishedDateDesc);
 ---
-<Layout title={`${tag}`} description={`Blog posts in the tagged #${tag}`}>
+<Layout title={`${tag}`} description={`Posts tagged #${tag}`}>
     <div class="w-full py-7 md:py-8">
-        <h1 class="font-display text-3xl text-black font-extrabold mb-8 md:text-6xl md:leading-[1.1] md:text-center">#{tag}</h1>
+        <h1 class="font-display text-3xl text-black font-extrabold mb-8 md:text-6xl md:leading-[1.1] md:text-center"><span class="visibly-hidden">Posts tagged </span>#{tag}</h1>
         <ul>
             {posts.map(post => (
                 <li class="py-7 border-b md:py-8">

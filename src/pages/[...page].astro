@@ -24,8 +24,10 @@ const { page } = Astro.props as Props
 ---
 
 <Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
-	{page.currentPage === 1 && (
+	{page.currentPage === 1 ? (
 		<Intro />
+	) : (
+		<h1 class="visibly-hidden">Blog Posts - Page {page.currentPage}</h1>
 	)}
 	<div>
 		<ul>
