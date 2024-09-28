@@ -12,7 +12,7 @@ const { search, pathname } = Astro.url;
 <meta property="og:title" content={title === import.meta.env.DOMAIN ? title : `${title} | ${import.meta.env.DOMAIN}`}>
 <meta property="og:description" content={description}>
 <meta property="og:image" content={image || defaultImage}>
-<meta property="og:url" content={`${origin}${pathname}${search ? search : ''}`}>
+<meta property="og:url" content={`${origin}${pathname.replace(/.html?$/, '')}${search ? search : ''}`}>
 <meta property="og:type" content="website" />
 
 <meta name="twitter:card" content="summary_large_image">
