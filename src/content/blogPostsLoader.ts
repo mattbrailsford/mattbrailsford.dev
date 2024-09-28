@@ -2,6 +2,8 @@
 import { getAllPosts } from "../repository/getAllPosts.ts";
 import { z } from "astro:content";
 
+// Flag to set whether data should be loaded incrementally
+// based on the last modified date, or if all data should be reloaded
 const incremental = true;
 
 export function blogPostsLoader(): Loader {
