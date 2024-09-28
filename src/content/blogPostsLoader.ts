@@ -17,7 +17,7 @@ export function blogPostsLoader(): Loader {
             const posts = await getAllPosts(incremental ? lastModified : undefined);
             logger.info(`Processing Posts: ${posts.length}`);
             
-            let maxDate: Date = new Date(lastModified ?? 0);
+            let maxUpdatedDate: Date = new Date(lastModified ?? 0);
             
             if (!incremental) {
                 store.clear();
@@ -43,12 +43,12 @@ export function blogPostsLoader(): Loader {
                     digest
                 });
                 
-                if (item.updated > maxDate) {
-                    maxDate = item.updated;
+                if (item.updated > maxUpdatedDate) {
+                    maxUpdatedDate = item.updated;
                 }
             }
             
-            meta.set('last-modified', maxDate.toISOString().split('T')[0]);
+            meta.set('last-modified', maxUpdatedDate.toISOString().split('T')[0]);
 
             logger.info(`New Last Modified: ${meta.get('last-modified')}`);
         },
