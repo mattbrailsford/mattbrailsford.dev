@@ -2,7 +2,7 @@
 import PostLink from "../../components/PostLink.astro";
 import Layout from "../../layouts/Default.astro";
 import type {PostSeries} from "../../types";
-import {getBlogSeries, getBlogPosts, sortPostsPublishedDateAsc} from "../../utils";
+import {getBlogSeries, getBlogPosts, sortPostsByPublishedDateAsc} from "../../utils";
 
 interface Props {
     series: PostSeries
@@ -22,7 +22,7 @@ export const getStaticPaths = (async () => {
 
 const { series } = Astro.props as Props;
 const posts = (await getBlogPosts((post) => post.series?.id === series.id))
-    .sort(sortPostsPublishedDateAsc);
+    .sort(sortPostsByPublishedDateAsc);
 
 const ogImageUrl = new URL(`/open-graph/series-${series.id}.png`, Astro.site)
 ---

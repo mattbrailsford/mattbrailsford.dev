@@ -1,7 +1,7 @@
 ﻿---
 import PostLink from "../../components/PostLink.astro";
 import Layout from "../../layouts/Default.astro";
-import {getBlogTags, getBlogPosts, sortPostsPublishedDateDesc} from "../../utils";
+import {getBlogTags, getBlogPosts, sortPostsByPublishedDateDesc} from "../../utils";
 
 interface Params {
     tag: string 
@@ -18,7 +18,7 @@ export  const getStaticPaths = (async () => {
 
 const { tag } = Astro.params as Params;
 const posts = (await getBlogPosts((post) => post.tags.includes(tag)))
-    .sort(sortPostsPublishedDateDesc);
+    .sort(sortPostsByPublishedDateDesc);
 
 const ogImageUrl = new URL(`/open-graph/tag-${tag}.png`, Astro.site)
 ---

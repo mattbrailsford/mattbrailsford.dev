@@ -74,11 +74,11 @@ export async function getBlogSeries(): Promise<PostSeries[]> {
         .values());
 }
 
-export function sortPostsPublishedDateDesc(a: Post, b: Post) {
+export function sortPostsByPublishedDateDesc(a: Post, b: Post) {
     return b.published.getTime() - a.published.getTime();
 }
 
-export function sortPostsPublishedDateAsc(a: Post, b: Post) {
+export function sortPostsByPublishedDateAsc(a: Post, b: Post) {
     return a.published.getTime() - b.published.getTime();
 }
 
