@@ -5,6 +5,7 @@ import {escapeHtml, sortPostsPublishedDateDesc} from "../utils";
 import type { APIContext } from 'astro';
 
 export async function GET(context:APIContext) {
+    const rssUrl  = new URL('/rss', context.site);
     const posts = (await getCollection('blogPosts'))
         .map(post => post.data)
         .sort(sortPostsPublishedDateDesc);
@@ -19,6 +20,10 @@ export async function GET(context:APIContext) {
             pubDate: post.published,
             link: `/${post.slug}`,
         })),
+        xmlns: {
+            atom: 'http://www.w3.org/2005/Atom',
+        },
+        customData: `<atom:link href="${rssUrl}" rel="self" type="application/rss+xml" />`
     })
     response.headers.set('Content-Type', 'application/rss+xml');
     return response;
