@@ -48,7 +48,7 @@ export function blogPostsLoader(): Loader {
                 }
             }
             
-            meta.set('last-modified', maxUpdatedDate.toISOString().split('T')[0]);
+            meta.set('last-modified', maxUpdatedDate.toISOString());
 
             logger.info(`New Last Modified: ${meta.get('last-modified')}`);
         },

@@ -10,8 +10,8 @@ const getPosts = async (limit = 50, after?: string, lastModified?: string): Prom
     // category:"Blog Post" limits the search to discussions with the category "Blog Post"
     // -label:state/draft excludes discussions with the label "state/draft"
     // sort:updated-asc sorts the results by the updated date in ascending order (must be ascending to allow tracking of last modified date)
-    // updated:>${lastModified} limits the search to discussions updated after the lastModified date
-    const query = `repo:${import.meta.env.GITHUB_REPO_OWNER}/${import.meta.env.GITHUB_REPO_NAME} category:"Blog Post" -label:state/draft sort:updated-asc ${lastModified ? `updated:>=${lastModified}` : ''}`
+    // updated:>${lastModified} limits the search to discussions updated after the supplied lastModified date
+    const query = `repo:${import.meta.env.GITHUB_REPO_OWNER}/${import.meta.env.GITHUB_REPO_NAME} category:"Blog Post" -label:state/draft sort:updated-asc ${lastModified ? `updated:>${lastModified}` : ''}`
     
     const { data } = await client.query(
         SEARCH_POSTS_QUERY,
