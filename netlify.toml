@@ -1,0 +1,8 @@
+﻿[[redirects]]
+  from = "/building-a-blog-on-github-discussions"
+  to = "/building-a-github-discussions-powered-blog"
+
+[[headers]]
+  for = "/rss*"
+  [headers.values]
+    Content-Type = "application/rss+xml"
