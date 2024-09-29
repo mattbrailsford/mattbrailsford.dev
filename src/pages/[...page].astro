@@ -21,9 +21,25 @@ export const getStaticPaths = (async ({ paginate } : { paginate:any }) => {
 })
 
 const { page } = Astro.props as Props
+
+const schema = {
+	"@context": "https://schema.org",
+	"@type": "Blog",
+	"headline": SITE_TITLE,
+	"description": SITE_DESCRIPTION,
+	"url": Astro.site,
+	"publisher": {
+		"@type": "Organization",
+		"name": "Matt Brailsford",
+		"logo": {
+			"@type": "ImageObject",
+			"url": "https://mattbrailsford.dev/logo.svg"
+		}
+	}
+}
 ---
 
-<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION} schema={schema}>
 	{page.currentPage === 1 ? (
 		<Intro />
 	) : (

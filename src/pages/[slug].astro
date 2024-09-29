@@ -30,9 +30,38 @@ if (!post) {
 }
 
 const ogImageUrl = new URL(`/open-graph/${post.slug}.png`, Astro.site)
+const canonicalUrl = new URL(`/${post.slug}`, Astro.site)
+
+const schema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.description,
+    "datePublished": post.published,
+    "dateModified": post.updated,
+    "author": {
+        "@type": "Person",
+        "name": "Matt Brailsford"
+    },
+    "image": ogImageUrl.toString(),
+    "url": canonicalUrl,
+    "publisher": {
+        "@type": "Organization",
+        "name": "Matt Brailsford",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://mattbrailsford.dev/logo.svg"
+        }
+    },
+    "keywords": post.tags,
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": canonicalUrl
+    }
+};
 
 ---
-<Layout title={post.title} description={post?.description} image={ogImageUrl.toString()}>
+<Layout title={post.title} description={post?.description} image={ogImageUrl.toString()} schema={schema}>
     <article class="w-full py-7 md:py-8">
         <FormattedDate date={post.published} class="text-sm text-slate-500 uppercase font-medium" />
         <h1 class="font-display text-4xl text-black font-extrabold mb-2 md:text-6xl md:leading-[1.1]">{post.title}</h1>
