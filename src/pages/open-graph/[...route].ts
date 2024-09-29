@@ -20,13 +20,14 @@ export const { getStaticPaths, GET } = OGImageRoute({
             title: {
                 color: [0,0,0],
                 families: ['Roboto Slab', 'serif'],
-                size: 80,
+                size: 65,
                 weight: 'ExtraBold',
                 lineHeight: 1.1,
             },
             description: {
                 color: [200,200,200],
                 families: ['sans-serif'],
+                size: 30,
                 weight: 'Medium',
                 lineHeight: 1.1,
             }
