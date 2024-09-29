@@ -8,6 +8,7 @@ export const { getStaticPaths, GET } = OGImageRoute({
     param: 'route',
     pages: Object.fromEntries(posts.map(({ data }) => [ data.slug, data ])),
     getImageOptions: (_, page) => ({
+        cacheDir: './node_modules/.astro-og-canvas-v2',
         title: page.title,
         description: `${formatDate(page.published)} | ${page.readingTime}`,
         bgGradient:[[255,255,255]],
