@@ -10,6 +10,7 @@ import oembedTransformer from '@remark-embedder/transformer-oembed'
 import matter from 'gray-matter';
 import { readingTime } from 'reading-time-estimator';
 import slugify from 'slugify';
+import { stripHtml } from "string-strip-html";
 import type { Post } from './types';
 
 export async function mapPost({ node }: { node: any }): Promise<Post> {
@@ -27,7 +28,7 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
         id: node.id,
         slug: frontmatter.slug ?? slugify(node.title, { lower: true }),
         title: node.title,
-        description: frontmatter && frontmatter.description,
+        description: frontmatter?.description ?? truncateAfter(stripHtml(content).result, 150),
         content,
         created: new Date(node.createdAt),
         updated: new Date(node.updatedAt),
@@ -82,4 +83,10 @@ export function escapeHtml(unsafe:string)
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+export function truncateAfter(str: string, length: number, delimiter: string = '...') {
+    if (str.length <= length) return str;
+    const lastSpace = str.slice(0, length - delimiter.length + 1).lastIndexOf(' ');
+    return str.slice(0, lastSpace > 0 ? lastSpace : length - delimiter.length) + delimiter;
 }
