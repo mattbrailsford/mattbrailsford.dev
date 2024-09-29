@@ -80,9 +80,7 @@ export function escapeHtml(unsafe:string)
     return unsafe
         .replace(/&/g, "&#x26;")
         .replace(/</g, "&#x3C;")
-        .replace(/>/g, "&#x3E;")
-        .replace(/"/g, "&#x22;")
-        .replace(/'/g, "&#x27;");
+        .replace(/>/g, "&#x3E;");
 }
 
 export function truncateAfter(str: string, length: number, delimiter: string = '...') {
