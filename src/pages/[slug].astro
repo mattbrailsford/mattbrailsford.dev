@@ -1,5 +1,5 @@
 ﻿---
-import { getCollection } from "astro:content";
+import {getBlogPosts} from "../utils";
 import Layout from "../layouts/Default.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import TagList from "../components/TagList.astro";
@@ -12,13 +12,13 @@ interface Props {
 }
     
 export const getStaticPaths = (async () => {
-    const posts = await getCollection('blogPosts');
+    const posts: Post[] = await getBlogPosts();
     return posts.map(post => ({
         params: {
-            slug: post.data.slug
+            slug: post.slug
         },
         props: {
-            post: post.data
+            post: post
         }
     }))
 });

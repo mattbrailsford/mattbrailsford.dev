@@ -1,25 +1,15 @@
 ﻿---
-import { getCollection } from "astro:content";
 import PostLink from "../../components/PostLink.astro";
 import Layout from "../../layouts/Default.astro";
 import type {PostSeries} from "../../types";
-import {sortPostsPublishedDateAsc} from "../../utils";
+import {getBlogSeries, getBlogPosts, sortPostsPublishedDateAsc} from "../../utils";
 
 interface Props {
     series: PostSeries
 }
     
 export const getStaticPaths = (async () => {
-    const posts = await getCollection('blogPosts');
-    const series : PostSeries[] = posts
-        .filter(post => post.data.series)
-        .map(post => post.data.series!)
-        .reduce((acc: PostSeries[], cur : PostSeries) => {
-            if (acc.every(x => x.id !== cur.id)) {
-                acc.push(cur);
-            }
-            return acc;
-        }, [])
+    const series: PostSeries[] = await getBlogSeries();
     return series.map(s => ({
         params: {
             series: s.id
@@ -31,11 +21,12 @@ export const getStaticPaths = (async () => {
 });
 
 const { series } = Astro.props as Props;
-const posts = (await getCollection('blogPosts', (post) => post.data.series?.id === series.id))
-    .map(post => post.data)
+const posts = (await getBlogPosts((post) => post.series?.id === series.id))
     .sort(sortPostsPublishedDateAsc);
+
+const ogImageUrl = new URL(`/open-graph/series-${series.id}.png`, Astro.site)
 ---
-<Layout title={series!.name} description={`Posts from the ${series!.name} series`}>
+<Layout title={series!.name} description={`Posts from the ${series!.name} series`} image={ogImageUrl.toString()}>
     <h1 class="visibly-hidden">Posts from the '{series!.name}' series</h1>
     <ul>
         {posts.map(post => (

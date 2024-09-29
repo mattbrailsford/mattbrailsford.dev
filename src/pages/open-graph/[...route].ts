@@ -1,16 +1,48 @@
 ﻿import { OGImageRoute } from '../../../lib/astro-og-canvas';
-import { getCollection } from 'astro:content';
-import {formatDate} from "../../utils.ts";
+import {formatDate, getBlogPosts, getBlogSeries, getBlogTags} from "../../utils.ts";
 
-const posts = await getCollection('blogPosts');
+interface Routable {
+    slug: string
+    title: string
+    description: string
+}
+
+const posts = await getBlogPosts();
+const postRoutables : Routable[] = posts.map(post => ({
+    slug: post.slug,
+    title: post.title,
+    description: `${formatDate(post.published)} | ${post.readingTime}`
+}));
+
+const tags = await getBlogTags();
+const tagRoutables : Routable[] = tags.map(tag => {
+    const taggedPosts = posts.filter(post => post.tags.includes(tag)).length;
+    return {
+        slug: `tag-${tag}`,
+        title: `Posts tagged '#${tag}'`,
+        description: `${taggedPosts} ${taggedPosts === 1 ? 'post' : 'posts'}`
+    }
+});
+
+const series = await getBlogSeries();
+const seriesRoutables : Routable[] = series.map(series => {
+    const seriesPosts = posts.filter(post => post.series?.id === series.id).length;
+    return {
+        slug: `series-${series.id}`,
+        title: series.name,
+        description: `${seriesPosts} ${seriesPosts === 1 ? 'post' : 'posts'}`
+    }
+});
+
+const routables = [...postRoutables, ...tagRoutables, ...seriesRoutables];
 
 export const { getStaticPaths, GET } = OGImageRoute({
     param: 'route',
-    pages: Object.fromEntries(posts.map(({ data }) => [ data.slug, data ])),
+    pages: Object.fromEntries(routables.map(routable => [ routable.slug, routable ])),
     getImageOptions: (_, page) => ({
         cacheDir: './node_modules/.astro-og-canvas-v2',
         title: page.title,
-        description: `${formatDate(page.published)} | ${page.readingTime}`,
+        description: page.description,
         bgGradient:[[255,255,255]],
         logo: {
             path: './public/logo-128.png',

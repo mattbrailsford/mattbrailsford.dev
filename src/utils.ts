@@ -11,7 +11,8 @@ import matter from 'gray-matter';
 import { readingTime } from 'reading-time-estimator';
 import slugify from 'slugify';
 import { stripHtml } from "string-strip-html";
-import type { Post } from './types';
+import type {Post, PostSeries} from './types';
+import {getCollection} from "astro:content";
 
 export async function mapPost({ node }: { node: any }): Promise<Post> {
     
@@ -59,12 +60,18 @@ export async function renderMarkdown(markdownContent: string): Promise<string> {
         .process(markdownContent)).toString();
 }
 
-export function formatDate(date: Date) {
-    return date.toLocaleDateString('en-us', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    })
+export async function getBlogPosts(filter: (post: Post) => Boolean = () => true): Promise<Post[]> {
+    return (await getCollection('blogPosts', (entry) => filter(entry.data))).map(x => x.data);
+}
+
+export async function getBlogTags(): Promise<string[]> {
+    return [...new Set((await getBlogPosts()).flatMap(post => post.tags))]
+}
+
+export async function getBlogSeries(): Promise<PostSeries[]> {
+    return Array.from(new Map((await getBlogPosts()).filter(post => post.series)
+        .map(post => [post.series!.id, post.series!]))
+        .values());
 }
 
 export function sortPostsPublishedDateDesc(a: Post, b: Post) {
@@ -79,4 +86,12 @@ export function truncateAfter(str: string, length: number, delimiter: string = '
     if (str.length <= length) return str;
     const lastSpace = str.slice(0, length - delimiter.length + 1).lastIndexOf(' ');
     return str.slice(0, lastSpace > 0 ? lastSpace : length - delimiter.length) + delimiter;
+}
+
+export function formatDate(date: Date) {
+    return date.toLocaleDateString('en-us', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    })
 }

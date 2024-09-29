@@ -1,16 +1,14 @@
 ﻿---
-import { getCollection } from "astro:content";
 import PostLink from "../../components/PostLink.astro";
 import Layout from "../../layouts/Default.astro";
-import {sortPostsPublishedDateDesc} from "../../utils";
+import {getBlogTags, getBlogPosts, sortPostsPublishedDateDesc} from "../../utils";
 
 interface Params {
     tag: string 
 }
 
 export  const getStaticPaths = (async () => {
-    const posts = await getCollection('blogPosts');
-    const tags = [...new Set(posts.flatMap(post => post.data.tags))];
+    const tags: string[] = await getBlogTags();
     return tags.map(tag => ({
         params: {
             tag
@@ -19,11 +17,12 @@ export  const getStaticPaths = (async () => {
 });
 
 const { tag } = Astro.params as Params;
-const posts = (await getCollection('blogPosts', (post) => post.data.tags.includes(tag)))
-    .map(post => post.data)
+const posts = (await getBlogPosts((post) => post.tags.includes(tag)))
     .sort(sortPostsPublishedDateDesc);
+
+const ogImageUrl = new URL(`/open-graph/tag-${tag}.png`, Astro.site)
 ---
-<Layout title={`${tag}`} description={`Posts tagged #${tag}`}>
+<Layout title={`${tag}`} description={`Posts tagged #${tag}`} image={ogImageUrl.toString()}>
     <div class="w-full py-7 md:py-8">
         <h1 class="font-display text-3xl text-black font-extrabold mb-8 md:text-6xl md:leading-[1.1] md:text-center"><span class="visibly-hidden">Posts tagged </span>#{tag}</h1>
         <ul>
