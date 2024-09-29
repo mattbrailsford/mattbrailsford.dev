@@ -1,3 +1,8 @@
+# Edit this file directly from GitHub as editing in windows seems to corrupt it (probably a BOM)
+[[redirects]]
+  from = "/building-a-blog-on-github-discussions"
+  to = "/building-a-github-discussions-powered-blog"
+
 [[headers]]
   for = "/rss*"
   [headers.values]
