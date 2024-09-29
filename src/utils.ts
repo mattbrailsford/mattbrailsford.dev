@@ -80,11 +80,30 @@ export function escapeHtml(unsafe:string)
     return unsafe
         .replace(/&/g, "&#x26;")
         .replace(/</g, "&#x3C;")
-        .replace(/>/g, "&#x3E;");
+        .replace(/>/g, "&#x3E;")
+        .replace(/"/g, "&#x22;")
+        .replace(/'/g, "&#x27;");
 }
 
 export function truncateAfter(str: string, length: number, delimiter: string = '...') {
     if (str.length <= length) return str;
     const lastSpace = str.slice(0, length - delimiter.length + 1).lastIndexOf(' ');
     return str.slice(0, lastSpace > 0 ? lastSpace : length - delimiter.length) + delimiter;
+}
+
+export function decodeHTML (html:string) {
+    const translate_re = /&(nbsp|amp|quot|lt|gt);/g;
+    const translate: Record<string, string> = {
+        "nbsp":" ",
+        "amp" : "&",
+        "quot": "\"",
+        "lt"  : "<",
+        "gt"  : ">"
+    };
+    return html.replace(translate_re, function(match, entity : string) {
+        return translate[entity];
+    }).replace(/&#(\d+);/gi, function(match, numStr) {
+        const num = parseInt(numStr, 10);
+        return String.fromCharCode(num);
+    });
 }

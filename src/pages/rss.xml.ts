@@ -1,7 +1,7 @@
 ﻿import rss from '@astrojs/rss';
 import {SITE_TITLE, SITE_DESCRIPTION} from '../consts';
 import {getCollection} from "astro:content";
-import {escapeHtml, sortPostsPublishedDateDesc} from "../utils";
+import {decodeHTML, escapeHtml, sortPostsPublishedDateDesc} from "../utils";
 import type { APIContext } from 'astro';
 
 export async function GET(context:APIContext) {
@@ -9,14 +9,14 @@ export async function GET(context:APIContext) {
     const posts = (await getCollection('blogPosts'))
         .map(post => post.data)
         .sort(sortPostsPublishedDateDesc);
-    const response = await rss({
+    return await rss({
         title: SITE_TITLE,
         description: SITE_DESCRIPTION,
         site: context.site!,
         trailingSlash: false,
         items: posts.map((post) => ({
-            title: escapeHtml(post.title),
-            description: escapeHtml(post.description ?? ""),
+            title: post.title,
+            description: post.description ?? "",
             pubDate: post.published,
             link: `/${post.slug}`,
         })),
@@ -25,6 +25,4 @@ export async function GET(context:APIContext) {
         },
         customData: `<atom:link href="${rssUrl}" rel="self" type="application/rss+xml" />`
     })
-    response.headers.set('Content-Type', 'application/rss+xml');
-    return response;
 }
