@@ -29,7 +29,7 @@ const { title, description, image, schema } = Astro.props;
 
 {schema && (
 <!-- Schema.org -->
-<script type="application/ld+json" set:html={JSON.stringify(schema)}></script>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline></script>
 )}
 
 <!-- SEO -->
