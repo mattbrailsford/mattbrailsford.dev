@@ -78,10 +78,11 @@ export function sortPostsPublishedDateAsc(a: Post, b: Post) {
 export function escapeHtml(unsafe:string)
 {
     return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+        .replace(/&/g, "&#x26;")
+        .replace(/</g, "&#x3C;")
+        .replace(/>/g, "&#x3E;")
+        .replace(/"/g, "&#x22;")
+        .replace(/'/g, "&#x27;");
 }
 
 export function truncateAfter(str: string, length: number, delimiter: string = '...') {
