@@ -1,4 +1,4 @@
-﻿[[headers]]
+[[headers]]
   for = "/rss*"
   [headers.values]
     Content-Type = "application/rss+xml"
