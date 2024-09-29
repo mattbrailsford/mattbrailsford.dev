@@ -4,7 +4,7 @@ import { z } from "astro:content";
 
 // Flag to set whether data should be loaded incrementally
 // based on the last modified date, or if all data should be reloaded
-const incremental = false;
+const incremental = true;
 
 export function blogPostsLoader(): Loader {
     return {
