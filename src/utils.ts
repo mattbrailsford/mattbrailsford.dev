@@ -73,3 +73,13 @@ export function sortPostsPublishedDateDesc(a: Post, b: Post) {
 export function sortPostsPublishedDateAsc(a: Post, b: Post) {
     return a.published.getTime() - b.published.getTime();
 }
+
+export function escapeHtml(unsafe:string)
+{
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}

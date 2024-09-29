@@ -1,26 +1,17 @@
 ﻿import rss from '@astrojs/rss';
 import {SITE_TITLE, SITE_DESCRIPTION} from '../consts';
 import {getCollection} from "astro:content";
-import {sortPostsPublishedDateDesc} from "../utils";
+import {escapeHtml, sortPostsPublishedDateDesc} from "../utils";
+import type { APIContext } from 'astro';
 
-function escapeHtml(unsafe)
-{
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-export async function GET(context) {
+export async function GET(context:APIContext) {
     const posts = (await getCollection('blogPosts'))
         .map(post => post.data)
         .sort(sortPostsPublishedDateDesc);
-    return rss({
+    const response = await rss({
         title: SITE_TITLE,
         description: SITE_DESCRIPTION,
-        site: context.site,
+        site: context.site!,
         trailingSlash: false,
         items: posts.map((post) => ({
             title: escapeHtml(post.title),
@@ -29,4 +20,6 @@ export async function GET(context) {
             link: `/${post.slug}`,
         })),
     })
+    response.headers.set('Content-Type', 'application/rss+xml');
+    return response;
 }
