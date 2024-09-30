@@ -40,10 +40,10 @@ export const { getStaticPaths, GET } = OGImageRoute({
     param: 'route',
     pages: Object.fromEntries(routables.map(routable => [ routable.slug, routable ])),
     getImageOptions: (_, page) => ({
-        cacheDir: './node_modules/.astro-og-canvas-v2',
+        cacheDir: './node_modules/.astro-og-canvas-v3',
         title: page.title,
         description: page.description,
-        bgGradient:[[255,255,255]],
+        bgGradient:[[255,255,255]], 
         logo: {
             path: './public/logo-128.png',
             size: [ 120, 120 ]
@@ -53,7 +53,7 @@ export const { getStaticPaths, GET } = OGImageRoute({
             title: {
                 color: [0,0,0],
                 families: ['Roboto Slab', 'serif'],
-                size: 65,
+                size: page.title.length > 65 ? 65 : 80,
                 weight: 'ExtraBold',
                 lineHeight: 1.1,
             },
