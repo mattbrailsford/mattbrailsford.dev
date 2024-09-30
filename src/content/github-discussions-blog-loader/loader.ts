@@ -2,23 +2,43 @@
 import { z } from "astro:content";
 import { GitHubClient } from "./client.ts";
 
-export function githubDiscussionsBlogLoader(options: { apiKey:string, repoOwner:string, repoName:string, incremental?: boolean }): Loader {
+export function githubDiscussionsBlogLoader({ 
+    apiKey, 
+    repoOwner, 
+    repoName, 
+    incremental = false,
+    blogPostCategory = "Blog Post",
+    draftLabel = "state/draft"
+} : { 
+    apiKey:string, 
+    repoOwner:string, 
+    repoName:string, 
+    incremental?: boolean 
+    blogPostCategory?: string
+    draftLabel?: string
+}): Loader {
     return {
         name: "github-discussions-blog-loader",
         load: async ({ store, parseData, generateDigest, meta, logger }): Promise<void> => {
 
             let lastModified = meta.get('last-modified');
-            if (options.incremental) {
+            if (incremental) {
                 logger.info(`Last Modified: ${lastModified}`);
             }
             
-            const client = new GitHubClient({ ...options });
-            const posts = await client.getAllPosts(options.incremental ? lastModified : undefined);
+            const client = new GitHubClient({ 
+                apiKey, 
+                repoOwner, 
+                repoName,
+                blogPostCategory,
+                draftLabel
+            });
+            const posts = await client.getAllPosts(incremental ? lastModified : undefined);
             logger.info(`Processing ${posts.length} blog posts`);
             
             let maxUpdatedDate: Date = new Date(lastModified ?? 0);
             
-            if (!options.incremental) {
+            if (!incremental) {
                 store.clear();
             }
             
@@ -46,7 +66,7 @@ export function githubDiscussionsBlogLoader(options: { apiKey:string, repoOwner:
                 }
             }
 
-            if (options.incremental)  {
+            if (incremental)  {
                 meta.set('last-modified', maxUpdatedDate.toISOString());
                 logger.info(`New Last Modified: ${meta.get('last-modified')}`);
             }

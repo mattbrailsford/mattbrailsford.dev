@@ -6,7 +6,7 @@ export class GitHubClient {
     
     private readonly _options: GitHubClientOptions;
     
-    constructor(options:GitHubClientOptions) 
+    constructor(options : GitHubClientOptions) 
     {
         this._options = options;
     }
@@ -19,8 +19,8 @@ export class GitHubClient {
         // -label:state/draft excludes discussions with the label "state/draft"
         // sort:updated-asc sorts the results by the updated date in ascending order (must be ascending to allow tracking of last modified date)
         // updated:>${lastModified} limits the search to discussions updated after the supplied lastModified date
-        const query = `repo:${this._options.repoOwner}/${this._options.repoName} category:"Blog Post" -label:state/draft sort:updated-asc ${lastModified ? `updated:>${lastModified}` : ''}`
-
+        const query = `repo:${this._options.repoOwner}/${this._options.repoName} category:"${this._options.blogPostCategory!}" -label:"${this._options.draftLabel!}" sort:updated-asc ${lastModified ? `updated:>${lastModified}` : ''}`
+        
         const response = await fetch(GITHUB_API_URL,
             {
                 method: 'POST',

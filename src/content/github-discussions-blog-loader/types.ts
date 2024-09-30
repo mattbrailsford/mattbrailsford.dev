@@ -2,6 +2,8 @@
     apiKey:string
     repoOwner:string
     repoName:string
+    blogPostCategory?:string
+    draftLabel?:string
 }
 
 export interface Post extends Record<string, unknown> {
