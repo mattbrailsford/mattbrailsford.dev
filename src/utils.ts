@@ -65,13 +65,11 @@ export async function getBlogPosts(filter: (post: Post) => Boolean = () => true)
 }
 
 export async function getBlogTags(): Promise<string[]> {
-    return [...new Set((await getBlogPosts()).flatMap(post => post.tags))]
+    return distinct((await getBlogPosts()).flatMap(post => post.tags));
 }
 
 export async function getBlogSeries(): Promise<PostSeries[]> {
-    return Array.from(new Map((await getBlogPosts()).filter(post => post.series)
-        .map(post => [post.series!.id, post.series!]))
-        .values());
+    return distinctBy((await getBlogPosts()).flatMap(x => x.series ?? []), series => series.id);
 }
 
 export function sortPostsByPublishedDateDesc(a: Post, b: Post) {
@@ -80,6 +78,14 @@ export function sortPostsByPublishedDateDesc(a: Post, b: Post) {
 
 export function sortPostsByPublishedDateAsc(a: Post, b: Post) {
     return a.published.getTime() - b.published.getTime();
+}
+
+export function distinct<T>(value: T[]) {
+    return [...new Set(value)];
+}
+
+export function distinctBy<T>(value: T[], key: (item: T) => any) {
+    return [...new Map(value.map(item => [key(item), item])).values()];
 }
 
 export function truncateAfter(str: string, length: number, delimiter: string = '...') {
