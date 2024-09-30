@@ -1,31 +1,28 @@
 ﻿import type { Loader } from 'astro/loaders';
-import { getAllPosts } from "../repository/getAllPosts.ts";
 import { z } from "astro:content";
+import { GitHubClient } from "./client.ts";
 
-// Flag to set whether data should be loaded incrementally
-// based on the last modified date, or if all data should be reloaded
-const incremental = true;
-
-export function blogPostsLoader(): Loader {
+export function githubDiscussionsBlogLoader(options: { apiKey:string, repoOwner:string, repoName:string, incremental?: boolean }): Loader {
     return {
-        name: "blog-posts-loader",
+        name: "github-discussions-blog-loader",
         load: async ({ store, parseData, generateDigest, meta, logger }): Promise<void> => {
 
             let lastModified = meta.get('last-modified');
-            logger.info(`Last Modified: ${lastModified}`);
+            if (options.incremental) {
+                logger.info(`Last Modified: ${lastModified}`);
+            }
             
-            const posts = await getAllPosts(incremental ? lastModified : undefined);
-            logger.info(`Processing Posts: ${posts.length}`);
+            const client = new GitHubClient({ ...options });
+            const posts = await client.getAllPosts(options.incremental ? lastModified : undefined);
+            logger.info(`Processing ${posts.length} blog posts`);
             
             let maxUpdatedDate: Date = new Date(lastModified ?? 0);
             
-            if (!incremental) {
+            if (!options.incremental) {
                 store.clear();
             }
             
             for (const item of posts) {
-
-                // Question: How to handle deleted posts?
                 
                 const data = await parseData({
                     id: item.id,
@@ -43,14 +40,16 @@ export function blogPostsLoader(): Loader {
                     digest
                 });
                 
-                if (item.updated > maxUpdatedDate) {
+                if (item.updated > maxUpdatedDate) 
+                {
                     maxUpdatedDate = item.updated;
                 }
             }
-            
-            meta.set('last-modified', maxUpdatedDate.toISOString());
 
-            logger.info(`New Last Modified: ${meta.get('last-modified')}`);
+            if (options.incremental)  {
+                meta.set('last-modified', maxUpdatedDate.toISOString());
+                logger.info(`New Last Modified: ${meta.get('last-modified')}`);
+            }
         },
         schema: () => z.object({
             id: z.string(),

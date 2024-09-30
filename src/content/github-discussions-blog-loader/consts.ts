@@ -1,6 +1,5 @@
-﻿import { gql } from '@urql/core'
-
-export default gql`
+﻿export const GITHUB_API_URL : string = 'https://api.github.com/graphql'
+export const SEARCH_POSTS_QUERY : string = `
   query ($query: String!, $limit: Int!, $after: String) {
     search(query: $query, type: DISCUSSION, first: $limit, after: $after) {
       pageInfo {

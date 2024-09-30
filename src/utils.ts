@@ -1,64 +1,5 @@
-﻿import {type Plugin, unified} from 'unified';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import rehypeStringify from 'rehype-stringify';
-import rehypeRaw from 'rehype-raw';
-import rehypeHighlight from 'rehype-highlight';
-import remarkGfm from 'remark-gfm';
-import { default as remarkEmbedderDefault , type RemarkEmbedderOptions} from '@remark-embedder/core';
-import oembedTransformer from '@remark-embedder/transformer-oembed'
-import matter from 'gray-matter';
-import { readingTime } from 'reading-time-estimator';
-import slugify from 'slugify';
-import { stripHtml } from "string-strip-html";
-import type {Post, PostSeries} from './types';
-import {getCollection} from "astro:content";
-
-export async function mapPost({ node }: { node: any }): Promise<Post> {
-    
-    // Extract frontmatter and content
-    const { data: frontmatter, content: markdownContent } = matter(node.body);
-
-    // Render content
-    const content = await renderMarkdown(markdownContent);
-    
-    const seriesNode = node.labels.edges.find((x:any) => x.node.name.startsWith('series/'));
-    
-    // Generate post model
-    return {
-        id: node.id,
-        slug: frontmatter.slug ?? slugify(node.title, { lower: true }),
-        title: node.title,
-        description: frontmatter?.description ?? truncateAfter(stripHtml(content).result, 150),
-        content,
-        created: new Date(node.createdAt),
-        updated: new Date(node.updatedAt),
-        published: new Date(frontmatter.published ?? node.createdAt),
-        readingTime: readingTime(content, 250).text,
-        githubUrl: node.url,
-        number: node.number,
-        tags: node.labels.edges.filter((x:any) => x.node.name.startsWith('tag/')).map((x:any) => x.node.name.replace('tag/', '')),
-        series: seriesNode && {
-            id: seriesNode.node.name.replace('series/', ''),
-            name: seriesNode.node.description
-        }
-    };
-}
-
-export async function renderMarkdown(markdownContent: string): Promise<string> {
-    const remarkEmbedder = (remarkEmbedderDefault as unknown as { default: Plugin<[RemarkEmbedderOptions]> }).default;
-    return (await unified()
-        .use(remarkParse)
-        .use(remarkRehype, {
-            allowDangerousHtml: true,
-        })
-        .use(rehypeRaw)
-        .use(rehypeStringify)
-        .use(rehypeHighlight)
-        .use(remarkGfm)
-        .use(remarkEmbedder, { transformers: [oembedTransformer] })
-        .process(markdownContent)).toString();
-}
+﻿import { getCollection } from "astro:content";
+import type { Post, PostSeries } from './types.ts';
 
 export async function getBlogPosts(filter: (post: Post) => Boolean = () => true): Promise<Post[]> {
     return (await getCollection('blogPosts', (entry) => filter(entry.data))).map(x => x.data);
@@ -86,12 +27,6 @@ export function distinct<T>(value: T[]) {
 
 export function distinctBy<T>(value: T[], key: (item: T) => any) {
     return [...new Map(value.map(item => [key(item), item])).values()];
-}
-
-export function truncateAfter(str: string, length: number, delimiter: string = '...') {
-    if (str.length <= length) return str;
-    const lastSpace = str.slice(0, length - delimiter.length + 1).lastIndexOf(' ');
-    return str.slice(0, lastSpace > 0 ? lastSpace : length - delimiter.length) + delimiter;
 }
 
 export function formatDate(date: Date) {
