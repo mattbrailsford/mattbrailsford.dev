@@ -1,19 +1,21 @@
 ﻿import type { Loader } from 'astro/loaders';
 import { z } from "astro:content";
 import { GitHubClient } from "./client.ts";
-import type { GitHubDiscussionsLoaderOptions } from "./types.ts";
+import type {GitHubDiscussionsLoaderOptions, GitHubMappings} from "./types.ts";
+
+export const DEFAULT_MAPPINGS : GitHubMappings = {
+    blogPostCategory: "Blog Post",
+    draftLabel: "state/draft",
+    tagLabelPrefix: "tag/",
+    seriesLabelPrefix: "series/"
+}
 
 export function githubDiscussionsBlogLoader({
     accessToken, 
     repoOwner, 
     repoName, 
     incremental = false,
-    mappings = {
-        blogPostCategory: "Blog Post",
-        draftLabel: "state/draft",
-        tagLabelPrefix: "tag/",
-        seriesLabelPrefix: "series/"
-    }
+    mappings = DEFAULT_MAPPINGS
 } : GitHubDiscussionsLoaderOptions): Loader {
     return {
         name: "github-discussions-blog-loader",

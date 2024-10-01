@@ -6,14 +6,14 @@ export interface GitHubClientOptions {
     accessToken:string
     repoOwner:string
     repoName:string
-    mappings: GitHubMappings
+    mappings?: GitHubMappings
 }
 
 export interface GitHubMappings {
-    blogPostCategory?: string
-    draftLabel?: string
-    tagLabelPrefix?: string
-    seriesLabelPrefix?: string
+    blogPostCategory: string
+    draftLabel: string
+    tagLabelPrefix: string
+    seriesLabelPrefix: string
 }
 
 export interface Post extends Record<string, unknown> {
