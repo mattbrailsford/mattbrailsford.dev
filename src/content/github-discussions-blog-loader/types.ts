@@ -3,10 +3,14 @@
 }
 
 export interface GitHubClientOptions {
-    accessToken:string
-    repoOwner:string
-    repoName:string
+    auth: string
+    repo: GitHubRepository
     mappings?: GitHubMappings
+}
+
+export interface GitHubRepository {
+    name: string
+    owner: string
 }
 
 export interface GitHubMappings {

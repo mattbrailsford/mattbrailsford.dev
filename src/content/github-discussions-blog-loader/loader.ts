@@ -11,9 +11,8 @@ export const DEFAULT_MAPPINGS : GitHubMappings = {
 }
 
 export function githubDiscussionsBlogLoader({
-    accessToken, 
-    repoOwner, 
-    repoName, 
+    auth, 
+    repo, 
     incremental = false,
     mappings = DEFAULT_MAPPINGS
 } : GitHubDiscussionsLoaderOptions): Loader {
@@ -26,12 +25,7 @@ export function githubDiscussionsBlogLoader({
                 logger.info(`Last Modified: ${lastModified}`);
             }
             
-            const client = new GitHubClient({
-                accessToken, 
-                repoOwner, 
-                repoName,
-                mappings
-            });
+            const client = new GitHubClient({ auth, repo, mappings });
             const posts = await client.getAllPosts(incremental ? lastModified : undefined);
             logger.info(`Processing ${posts.length} blog posts`);
             
