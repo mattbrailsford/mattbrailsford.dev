@@ -17,8 +17,8 @@ export class GitHubClient {
 
         // Build a query to search for blog post discussions
         // repo:... searches our specific repository
-        // category:"Blog Post" limits the search to discussions with the category "Blog Post"
-        // -label:state/draft excludes discussions with the label "state/draft"
+        // category:... limits the search to discussions with the blog post category
+        // -label:... excludes discussions with the draft label
         // sort:updated-asc sorts the results by the updated date in ascending order (must be ascending to allow tracking of last modified date)
         // updated:>${lastModified} limits the search to discussions updated after the supplied lastModified date
         const query = `repo:${this._options.repo.owner}/${this._options.repo.name} sort:updated-asc ${this._options.mappings!.blogPostCategory ? `category:"${this._options.mappings!.blogPostCategory}"` : ''} ${this._options.mappings!.draftLabel ? `-label:"${this._options.mappings!.draftLabel}"` : ''} ${lastModified ? `updated:>${lastModified}` : ''}`
