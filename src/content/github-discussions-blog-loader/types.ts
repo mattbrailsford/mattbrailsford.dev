@@ -20,34 +20,39 @@ export interface GitHubMappings {
     seriesLabelPrefix: string
 }
 
-export interface Post extends Record<string, unknown> {
+export interface GitHubPost extends Record<string, unknown> {
     id: string
-    slug: string
     title: string
-    description?: string
-    content: string
+    body: string
     created: Date
     updated: Date
-    published: Date
-    readingTime: string
     githubUrl: string
     number: number
     tags: string[]
-    series?: PostSeries
+    series?: GitHubPostSeries
 }
 
-export interface PostList {
-    posts: Post[]
-    pageInfo: PageInfo
+export interface GitHubPostList {
+    posts: GitHubPost[]
+    pageInfo: GitHubPageInfo
 }
 
-export interface PageInfo {
+export interface GitHubPageInfo {
     startCursor: string
     hasNextPage: boolean
     endCursor: string
 }
 
-export interface PostSeries {
+export interface GitHubPostSeries {
     id: string
     name: string
 }
+
+export interface Post extends GitHubPost {
+    slug: string
+    description?: string
+    readingTime: string
+    published: Date
+}
+
+export interface PostSeries extends GitHubPostSeries { }

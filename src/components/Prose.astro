@@ -2,19 +2,6 @@
 export type Props = { content?: string; }
 const { content } = Astro.props;
 
-import hljs from 'highlight.js/lib/common';
-import '../styles/hljs-measured-dark.css';
-
-import javascript from 'highlight.js/lib/languages/javascript';
-import csharp from 'highlight.js/lib/languages/csharp';
-import json from 'highlight.js/lib/languages/json';
-import powershell from 'highlight.js/lib/languages/powershell';
-
-hljs.registerLanguage('javascript', javascript);
-hljs.registerLanguage('csharp', csharp);
-hljs.registerLanguage('json', json);
-hljs.registerLanguage('powershell', powershell);
-
 ---
 <div class="prose 
     prose-slate 

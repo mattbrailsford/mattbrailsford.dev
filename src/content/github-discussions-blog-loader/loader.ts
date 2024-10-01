@@ -1,7 +1,8 @@
 ﻿import type { Loader } from 'astro/loaders';
 import { z } from "astro:content";
 import { GitHubClient } from "./client.ts";
-import type {GitHubDiscussionsLoaderOptions, GitHubMappings} from "./types.ts";
+import type { GitHubDiscussionsLoaderOptions, GitHubMappings } from "./types.ts";
+import {postProcessor} from "./processor.ts";
 
 export const DEFAULT_MAPPINGS : GitHubMappings = {
     blogPostCategory: "Blog Post",
@@ -18,7 +19,7 @@ export function githubDiscussionsBlogLoader({
 } : GitHubDiscussionsLoaderOptions): Loader {
     return {
         name: "github-discussions-blog-loader",
-        load: async ({ store, parseData, generateDigest, meta, logger }): Promise<void> => {
+        load: async ({ store, parseData, generateDigest, meta, config, logger }): Promise<void> => {
 
             let lastModified = meta.get('last-modified');
             if (incremental) {
@@ -27,6 +28,7 @@ export function githubDiscussionsBlogLoader({
             
             const client = new GitHubClient({ auth, repo, mappings });
             const posts = await client.getAllPosts(incremental ? lastModified : undefined);
+            
             logger.info(`Processing ${posts.length} blog posts`);
             
             let maxUpdatedDate: Date = new Date(lastModified ?? 0);
@@ -34,21 +36,26 @@ export function githubDiscussionsBlogLoader({
             if (!incremental) {
                 store.clear();
             }
+
+            const processor = await postProcessor(config);
             
             for (const item of posts) {
+
+                const { post, metadata } = await processor.process(item);
                 
                 const data = await parseData({
                     id: item.id,
-                    data: item,
+                    data: post,
                 });
                 
                 const digest = generateDigest(data);
                 
                 store.set({
-                    id: item.id,
+                    id: post.id,
                     data,
                     rendered: {
-                        html: item.content,
+                        html: post.body,
+                        metadata,
                     },
                     digest
                 });
@@ -69,7 +76,8 @@ export function githubDiscussionsBlogLoader({
             slug: z.string(),
             title: z.string(),
             description: z.string().optional(),
-            content: z.string(),
+            frontmatter: z.record(z.string(), z.unknown()).optional(),
+            body: z.string(),
             created: z.date(),
             updated: z.date(),
             published: z.date(),

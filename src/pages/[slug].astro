@@ -70,7 +70,7 @@ const schema = {
         </svg> {post.readingTime}</p>
         <TagList tags={post.tags} />
         {post.series && (<SeriesLinks series={post.series} currentSlug={post.id} class="relative mt-8" />)}
-        <Prose content={post.content} />
+        <Prose content={post.body} />
         {post.series && (<SeriesLinks series={post.series} currentSlug={post.id} class="relative mt-8" />)}
     </article>
     <div class="py-12"> 

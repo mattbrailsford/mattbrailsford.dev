@@ -1,6 +1,6 @@
 ﻿import { SEARCH_POSTS_QUERY } from "./graphql.ts";
-import type { GitHubClientOptions, Post, PostList } from "./types.ts";
-import { mapPost } from "./utils.ts";
+import type { GitHubClientOptions, GitHubPostList, GitHubPost } from "./types.ts";
+import { mapPosts } from "./mappers.ts";
 
 const GITHUB_API_URL : string = 'https://api.github.com/graphql'
 
@@ -13,7 +13,7 @@ export class GitHubClient {
         this._options = options;
     }
 
-    private async getPosts(limit = 50, after?: string, lastModified?: string): Promise<PostList> {
+    private async getPosts(limit = 50, after?: string, lastModified?: string): Promise<GitHubPostList> {
 
         // Build a query to search for blog post discussions
         // repo:... searches our specific repository
@@ -24,51 +24,37 @@ export class GitHubClient {
         const query = `repo:${this._options.repo.owner}/${this._options.repo.name} sort:updated-asc ${this._options.mappings!.blogPostCategory ? `category:"${this._options.mappings!.blogPostCategory}"` : ''} ${this._options.mappings!.draftLabel ? `-label:"${this._options.mappings!.draftLabel}"` : ''} ${lastModified ? `updated:>${lastModified}` : ''}`
         
         const response = await fetch(GITHUB_API_URL,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this._options.auth}`,
-                    'User-Agent': 'Astro'
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this._options.auth}`,
+                'User-Agent': 'Astro'
+            },
+            body: JSON.stringify({
+                query: SEARCH_POSTS_QUERY,
+                variables: {
+                    query,
+                    limit,
+                    after: after || null,
                 },
-                body: JSON.stringify({
-                    query: SEARCH_POSTS_QUERY,
-                    variables: {
-                        query,
-                        limit,
-                        after: after || null,
-                    },
-                }),
-            });
+            }),
+        });
         
         const { data } = await response.json();
 
-        if (!data) {
-            return {
-                posts: [],
-                pageInfo: {
-                    startCursor: '',
-                    endCursor: '',
-                    hasNextPage: false,
-                }
-            }
-        }
-
-        const posts =  await Promise.all(
-            data.search.edges.map((edge:any) => mapPost({
-                node: edge.node,
-                mappings: this._options.mappings!
-            })),
-        )
-
         return {
-            posts,
-            pageInfo: data.search.pageInfo,
+            posts: mapPosts({ data: data ?? [], mappings: this._options.mappings! }),
+            pageInfo: data?.search.pageInfo ?? {
+                startCursor: '',
+                endCursor: '',
+                hasNextPage: false,
+            }
         }
 
     }
 
-    private async getPostsRecursive(limit: number, after?: string, lastModified?:string): Promise<Post[]> {
+    private async getPostsRecursive(limit: number, after?: string, lastModified?:string): Promise<GitHubPost[]> {
         const { posts, pageInfo } = await this.getPosts(limit, after, lastModified);
         if (pageInfo.hasNextPage) {
             return posts.concat(await this.getPostsRecursive(limit, pageInfo.endCursor, lastModified))
@@ -76,7 +62,7 @@ export class GitHubClient {
         return posts;
     }
 
-    async getAllPosts (lastModified?:string): Promise<Post[]> {
+    async getAllPosts (lastModified?:string): Promise<GitHubPost[]> {
         return await this.getPostsRecursive(100, undefined, lastModified);
     }
 }

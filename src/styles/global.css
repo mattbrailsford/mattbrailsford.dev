@@ -1,4 +1,7 @@
-﻿pre code.hljs {
+﻿pre.astro-code {
+    display: block;
+    overflow-x: auto;
+    padding: 1em;
     border-radius: 0.75rem;
     line-height: 1.5;
 }
