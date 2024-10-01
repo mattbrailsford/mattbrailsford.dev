@@ -1,4 +1,4 @@
-﻿import {type Plugin, unified} from 'unified';
+﻿import { type Plugin, unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
@@ -11,9 +11,9 @@ import matter from 'gray-matter';
 import { readingTime } from 'reading-time-estimator';
 import slugify from 'slugify';
 import { stripHtml } from "string-strip-html";
-import type {Post} from "./types.ts";
+import type { GitHubMappings, Post } from "./types.ts";
 
-export async function mapPost({ node, mappings }: { node: any, mappings: { tagLabelPrefix?:string, seriesLabelPrefix?:string } }): Promise<Post> {
+export async function mapPost({ node, mappings }: { node: any, mappings: GitHubMappings }): Promise<Post> {
     
     // Extract frontmatter and content
     const { data: frontmatter, content: markdownContent } = matter(node.body);

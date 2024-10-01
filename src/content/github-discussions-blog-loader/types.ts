@@ -1,13 +1,19 @@
-﻿export interface GitHubClientOptions {
+﻿export interface GitHubDiscussionsLoaderOptions extends GitHubClientOptions {
+    incremental?: boolean
+}
+
+export interface GitHubClientOptions {
     accessToken:string
     repoOwner:string
     repoName:string
-    mappings: {
-        blogPostCategory?: string
-        draftLabel?: string
-        tagLabelPrefix?: string
-        seriesLabelPrefix?: string
-    }
+    mappings: GitHubMappings
+}
+
+export interface GitHubMappings {
+    blogPostCategory?: string
+    draftLabel?: string
+    tagLabelPrefix?: string
+    seriesLabelPrefix?: string
 }
 
 export interface Post extends Record<string, unknown> {

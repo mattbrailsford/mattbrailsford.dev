@@ -1,6 +1,7 @@
 ﻿import type { Loader } from 'astro/loaders';
 import { z } from "astro:content";
 import { GitHubClient } from "./client.ts";
+import type { GitHubDiscussionsLoaderOptions } from "./types.ts";
 
 export function githubDiscussionsBlogLoader({
     accessToken, 
@@ -13,18 +14,7 @@ export function githubDiscussionsBlogLoader({
         tagLabelPrefix: "tag/",
         seriesLabelPrefix: "series/"
     }
-} : {
-    accessToken:string, 
-    repoOwner:string, 
-    repoName:string, 
-    incremental?: boolean
-    mappings?: {
-        blogPostCategory?: string
-        draftLabel?: string
-        tagLabelPrefix?: string
-        seriesLabelPrefix?: string
-    }
-}): Loader {
+} : GitHubDiscussionsLoaderOptions): Loader {
     return {
         name: "github-discussions-blog-loader",
         load: async ({ store, parseData, generateDigest, meta, logger }): Promise<void> => {
