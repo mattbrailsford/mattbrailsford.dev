@@ -13,7 +13,6 @@
             id
             url
             number
-            databaseId
             title
             body
             createdAt
@@ -24,7 +23,6 @@
                   id
                   name
                   description
-                  color
                 }
               }
             }
