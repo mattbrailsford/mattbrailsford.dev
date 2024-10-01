@@ -21,7 +21,7 @@ export class GitHubClient {
         // -label:state/draft excludes discussions with the label "state/draft"
         // sort:updated-asc sorts the results by the updated date in ascending order (must be ascending to allow tracking of last modified date)
         // updated:>${lastModified} limits the search to discussions updated after the supplied lastModified date
-        const query = `repo:${this._options.repoOwner}/${this._options.repoName} sort:updated-asc ${this._options.mappings.blogPostCategory ? `category:"${this._options.mappings.blogPostCategory}"` : ''} ${this._options.mappings.draftLabel ? `-label:"${this._options.mappings.draftLabel}"` : ''} ${lastModified ? `updated:>${lastModified}` : ''}`
+        const query = `repo:${this._options.repoOwner}/${this._options.repoName} sort:updated-asc ${this._options.mappings!.blogPostCategory ? `category:"${this._options.mappings!.blogPostCategory}"` : ''} ${this._options.mappings!.draftLabel ? `-label:"${this._options.mappings!.draftLabel}"` : ''} ${lastModified ? `updated:>${lastModified}` : ''}`
         
         const response = await fetch(GITHUB_API_URL,
             {
@@ -57,7 +57,7 @@ export class GitHubClient {
         const posts =  await Promise.all(
             data.search.edges.map((edge:any) => mapPost({
                 node: edge.node,
-                mappings: this._options.mappings
+                mappings: this._options.mappings!
             })),
         )
 
