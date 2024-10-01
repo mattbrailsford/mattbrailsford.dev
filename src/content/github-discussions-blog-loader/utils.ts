@@ -26,13 +26,13 @@ export async function mapPost({ node, mappings }: { node: any, mappings: { tagLa
     // Generate post model
     return {
         id: node.id,
-        slug: frontmatter.slug ?? slugify(node.title, { lower: true }),
+        slug: frontmatter?.slug ?? slugify(node.title, { lower: true }),
         title: node.title,
         description: frontmatter?.description ?? truncateAfter(stripHtml(content).result, 150),
         content,
         created: new Date(node.createdAt),
         updated: new Date(node.updatedAt),
-        published: new Date(frontmatter.published ?? node.createdAt),
+        published: new Date(frontmatter?.published ?? node.createdAt),
         readingTime: readingTime(content, 250).text,
         githubUrl: node.url,
         number: node.number,
