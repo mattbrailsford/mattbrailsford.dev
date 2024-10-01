@@ -10,7 +10,7 @@ import Intro from "../components/Intro.astro";
 import {sortPostsByPublishedDateDesc} from "../utils";
 
 interface Props {
-	page: Page<Post>;
+    page: Page<Post>;
 }
 
 export const getStaticPaths = (async ({ paginate } : { paginate:any }) => {
