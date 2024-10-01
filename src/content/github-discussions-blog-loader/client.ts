@@ -1,6 +1,8 @@
-﻿import { GITHUB_API_URL, SEARCH_POSTS_QUERY } from "./consts.ts";
+﻿import { SEARCH_POSTS_QUERY } from "./graphql.ts";
 import type { GitHubClientOptions, Post, PostList } from "./types.ts";
 import { mapPost } from "./utils.ts";
+
+const GITHUB_API_URL : string = 'https://api.github.com/graphql'
 
 export class GitHubClient {
     
