@@ -3,7 +3,7 @@ import { githubDiscussionsBlogLoader } from "./github-discussions-blog-loader";
 
 const blogPosts = defineCollection({
     loader: githubDiscussionsBlogLoader({
-        apiKey: import.meta.env.GITHUB_API_KEY,
+        accessToken: import.meta.env.GITHUB_ACCESS_TOKEN,
         repoOwner: import.meta.env.GITHUB_REPO_OWNER,
         repoName: import.meta.env.GITHUB_REPO_NAME,
         incremental: true,

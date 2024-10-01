@@ -2,15 +2,15 @@
 import { z } from "astro:content";
 import { GitHubClient } from "./client.ts";
 
-export function githubDiscussionsBlogLoader({ 
-    apiKey, 
+export function githubDiscussionsBlogLoader({
+    accessToken, 
     repoOwner, 
     repoName, 
     incremental = false,
     blogPostCategory = "Blog Post",
     draftLabel = "state/draft"
-} : { 
-    apiKey:string, 
+} : {
+    accessToken:string, 
     repoOwner:string, 
     repoName:string, 
     incremental?: boolean 
@@ -26,8 +26,8 @@ export function githubDiscussionsBlogLoader({
                 logger.info(`Last Modified: ${lastModified}`);
             }
             
-            const client = new GitHubClient({ 
-                apiKey, 
+            const client = new GitHubClient({
+                accessToken, 
                 repoOwner, 
                 repoName,
                 blogPostCategory,

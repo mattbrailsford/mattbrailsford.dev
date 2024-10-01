@@ -1,5 +1,5 @@
 ﻿export interface GitHubClientOptions {
-    apiKey:string
+    accessToken:string
     repoOwner:string
     repoName:string
     blogPostCategory?:string

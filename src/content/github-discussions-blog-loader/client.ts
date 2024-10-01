@@ -21,14 +21,14 @@ export class GitHubClient {
         // -label:state/draft excludes discussions with the label "state/draft"
         // sort:updated-asc sorts the results by the updated date in ascending order (must be ascending to allow tracking of last modified date)
         // updated:>${lastModified} limits the search to discussions updated after the supplied lastModified date
-        const query = `repo:${this._options.repoOwner}/${this._options.repoName} sort:updated-asc ${this._options.blogPostCategory ? `category:"${this._options.blogPostCategory!}"` : ''} ${this._options.draftLabel ? `-label:"${this._options.draftLabel}"` : ''} ${lastModified ? `updated:>${lastModified}` : ''}`
+        const query = `repo:${this._options.repoOwner}/${this._options.repoName} sort:updated-asc ${this._options.blogPostCategory ? `category:"${this._options.blogPostCategory}"` : ''} ${this._options.draftLabel ? `-label:"${this._options.draftLabel}"` : ''} ${lastModified ? `updated:>${lastModified}` : ''}`
         
         const response = await fetch(GITHUB_API_URL,
             {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this._options.apiKey}`,
+                    'Authorization': `Bearer ${this._options.accessToken}`,
                     'User-Agent': 'Astro'
                 },
                 body: JSON.stringify({
