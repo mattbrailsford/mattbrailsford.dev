@@ -13,7 +13,7 @@ import slugify from 'slugify';
 import { stripHtml } from "string-strip-html";
 import type {Post} from "./types.ts";
 
-export async function mapPost({ node }: { node: any }): Promise<Post> {
+export async function mapPost({ node, tagLabelPrefix = 'tag/', seriesLabelPrefix = 'series/' }: { node: any, tagLabelPrefix?:string, seriesLabelPrefix?:string }): Promise<Post> {
     
     // Extract frontmatter and content
     const { data: frontmatter, content: markdownContent } = matter(node.body);
@@ -21,7 +21,7 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
     // Render content
     const content = await renderMarkdown(markdownContent);
     
-    const seriesNode = node.labels.edges.find((x:any) => x.node.name.startsWith('series/'));
+    const seriesNode = node.labels.edges.find((x:any) => x.node.name.startsWith(seriesLabelPrefix));
     
     // Generate post model
     return {
@@ -36,9 +36,9 @@ export async function mapPost({ node }: { node: any }): Promise<Post> {
         readingTime: readingTime(content, 250).text,
         githubUrl: node.url,
         number: node.number,
-        tags: node.labels.edges.filter((x:any) => x.node.name.startsWith('tag/')).map((x:any) => x.node.name.replace('tag/', '')),
+        tags: node.labels.edges.filter((x:any) => x.node.name.startsWith(tagLabelPrefix)).map((x:any) => x.node.name.replace(tagLabelPrefix, '')),
         series: seriesNode && {
-            id: seriesNode.node.name.replace('series/', ''),
+            id: seriesNode.node.name.replace(seriesLabelPrefix, ''),
             name: seriesNode.node.description
         }
     };

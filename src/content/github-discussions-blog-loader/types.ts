@@ -4,6 +4,8 @@
     repoName:string
     blogPostCategory?:string
     draftLabel?:string
+    tagLabelPrefix?:string
+    seriesLabelPrefix?:string
 }
 
 export interface Post extends Record<string, unknown> {

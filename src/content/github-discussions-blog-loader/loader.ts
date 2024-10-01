@@ -8,7 +8,9 @@ export function githubDiscussionsBlogLoader({
     repoName, 
     incremental = false,
     blogPostCategory = "Blog Post",
-    draftLabel = "state/draft"
+    draftLabel = "state/draft",
+    tagLabelPrefix = "tag/",
+    seriesLabelPrefix = "series/"
 } : {
     accessToken:string, 
     repoOwner:string, 
@@ -16,6 +18,8 @@ export function githubDiscussionsBlogLoader({
     incremental?: boolean 
     blogPostCategory?: string
     draftLabel?: string
+    tagLabelPrefix?: string
+    seriesLabelPrefix?: string
 }): Loader {
     return {
         name: "github-discussions-blog-loader",
@@ -31,7 +35,9 @@ export function githubDiscussionsBlogLoader({
                 repoOwner, 
                 repoName,
                 blogPostCategory,
-                draftLabel
+                draftLabel,
+                tagLabelPrefix,
+                seriesLabelPrefix
             });
             const posts = await client.getAllPosts(incremental ? lastModified : undefined);
             logger.info(`Processing ${posts.length} blog posts`);

@@ -55,7 +55,11 @@ export class GitHubClient {
         }
 
         const posts =  await Promise.all(
-            data.search.edges.map(mapPost),
+            data.search.edges.map((edge:any) => mapPost({
+                node: edge.node,
+                tagLabelPrefix: this._options.tagLabelPrefix,
+                seriesLabelPrefix: this._options.seriesLabelPrefix
+            })),
         )
 
         return {
