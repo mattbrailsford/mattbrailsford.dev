@@ -3,10 +3,10 @@
 export function gitHubMapper(mappings: GitHubMappings) {
     
     const mapPosts = (data: any): GitHubPost[] => {
-        return data.search.edges.map((edge: any) => mapPost({ node: edge.node, mappings }));
+        return data.search.edges.map(mapPost);
     }
 
-    const mapPost = (node: any): GitHubPost => {
+    const mapPost = ({ node } : { node: any }): GitHubPost => {
         return {
             id: node.id,
             title: node.title,
@@ -15,8 +15,8 @@ export function gitHubMapper(mappings: GitHubMappings) {
             updated: new Date(node.updatedAt),
             githubUrl: node.url,
             number: node.number,
-            tags: mapTags({ labels: node.labels, mappings }),
-            series: mapSeries({ labels: node.labels, mappings }),
+            tags: mapTags(node.labels),
+            series: mapSeries(node.labels),
         };
     }
 

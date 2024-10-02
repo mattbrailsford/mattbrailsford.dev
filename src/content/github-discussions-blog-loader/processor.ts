@@ -18,7 +18,7 @@ export async function gitHubPostProcessor(config: AstroConfig) {
             } 
         }> => {
             const { data: frontmatter, content: markdownContent } = matter(input.body);
-            const { code : html, metadata} = await markdownProcessor.render(input.body);
+            const { code : html, metadata} = await markdownProcessor.render(markdownContent);
             const text = stripHtml(html).result;
             const post = {
                 ...input,

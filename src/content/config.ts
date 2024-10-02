@@ -8,7 +8,7 @@ const blogPosts = defineCollection({
             name: import.meta.env.GITHUB_REPO_NAME,
             owner: import.meta.env.GITHUB_REPO_OWNER,
         },
-        incremental: true,
+        incremental: false,
     }),
 });
 
