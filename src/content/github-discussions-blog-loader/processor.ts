@@ -28,7 +28,7 @@ export async function gitHubPostProcessor(config: AstroConfig) {
             const { data: frontmatter, content: markdownContent } = matter(input.body);
             const { code : html, metadata} = await markdownProcessor.render(markdownContent);
             const text = stripHtml(html).result;
-            const post = {
+            const post : Post = {
                 ...input,
                 slug: frontmatter?.slug ?? slugify(input.title, { lower: true }),
                 description: frontmatter?.description ?? truncate(text, 150),

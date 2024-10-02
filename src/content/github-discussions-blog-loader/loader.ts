@@ -87,6 +87,11 @@ export function githubDiscussionsBlogLoader({
                 id: z.string(),
                 name: z.string(),
             }).optional(),
+            author: z.object({
+                avatarUrl: z.string(),
+                username: z.string(),
+                url: z.string(),
+            }),
         })
     };
 }

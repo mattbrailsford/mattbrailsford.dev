@@ -1,4 +1,4 @@
-﻿import type { GitHubMappings, GitHubPost, GitHubPostSeries } from "./types.ts";
+﻿import type { GitHubActor, GitHubMappings, GitHubPost, GitHubPostSeries } from "./types.ts";
 
 export function gitHubMapper(mappings: GitHubMappings) {
     
@@ -17,6 +17,7 @@ export function gitHubMapper(mappings: GitHubMappings) {
             number: node.number,
             tags: mapTags(node.labels),
             series: mapSeries(node.labels),
+            author: mapActor(node.author)
         };
     }
 
@@ -32,6 +33,14 @@ export function gitHubMapper(mappings: GitHubMappings) {
         }
     }
     
-    return { mapPosts, mapPost, mapTags, mapSeries };
+    const mapActor = (actor: any) : GitHubActor => {
+        return {
+            avatarUrl: actor.avatarUrl,
+            username: actor.login,
+            url: actor.url
+        }
+    }
+    
+    return { mapPosts, mapPost, mapTags, mapSeries, mapActor };
 }
 

@@ -17,6 +17,11 @@
             body
             createdAt
             updatedAt
+            author {
+              avatarUrl
+              login
+              url
+            }
             labels(first: 10) {
               edges {
                 node {
