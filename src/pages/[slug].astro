@@ -69,9 +69,9 @@ const schema = {
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg> {post.readingTime}</p>
         <TagList tags={post.tags} />
-        {post.series && (<SeriesLinks series={post.series} currentSlug={post.id} class="relative mt-8" />)}
+        {post.series && (<SeriesLinks series={post.series} currentSlug={post.slug} class="relative mt-8" />)}
         <Prose content={post.body} />
-        {post.series && (<SeriesLinks series={post.series} currentSlug={post.id} class="relative mt-8" />)}
+        {post.series && (<SeriesLinks series={post.series} currentSlug={post.slug} class="relative mt-8" />)}
     </article>
     <div class="py-12"> 
         <script 
