@@ -1,10 +1,10 @@
 ﻿import { SEARCH_POSTS_QUERY } from "./graphql.ts";
 import type { GitHubClientOptions, GitHubPostList, GitHubPost } from "./types.ts";
-import { gitHubMapper } from "./mapper.ts";
+import { githubMapper } from "./mapper.ts";
 
 const GITHUB_API_URL : string = 'https://api.github.com/graphql'
 
-export function gitHubClient(options : GitHubClientOptions) {
+export function githubClient(options : GitHubClientOptions) {
 
     const getPosts = async  (limit = 50, after?: string, lastModified?: string): Promise<GitHubPostList>  => {
 
@@ -36,7 +36,7 @@ export function gitHubClient(options : GitHubClientOptions) {
         
         const { data } = await response.json();
 
-        const mapper = gitHubMapper(options.mappings!);
+        const mapper = githubMapper(options.mappings!);
         
         return {
             posts: mapper.mapPosts(data ?? []),

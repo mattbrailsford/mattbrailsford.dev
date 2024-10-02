@@ -1,8 +1,8 @@
 ﻿import type { Loader } from 'astro/loaders';
 import { z } from "astro:content";
-import { gitHubClient } from "./client.ts";
+import { githubClient } from "./client.ts";
 import type { GitHubDiscussionsLoaderOptions, GitHubMappings } from "./types.ts";
-import { gitHubPostProcessor } from "./processor.ts";
+import { githubPostProcessor } from "./processor.ts";
 
 export const DEFAULT_MAPPINGS : GitHubMappings = {
     blogPostCategory: "Blog Post",
@@ -26,7 +26,7 @@ export function githubDiscussionsBlogLoader({
                 logger.info(`Last Modified: ${lastModified}`);
             }
             
-            const client = gitHubClient({ auth, repo, mappings });
+            const client = githubClient({ auth, repo, mappings });
             const posts = await client.getAllPosts(incremental ? lastModified : undefined);
             
             logger.info(`Processing ${posts.length} blog posts`);
@@ -37,7 +37,7 @@ export function githubDiscussionsBlogLoader({
                 store.clear();
             }
 
-            const processor = await gitHubPostProcessor(config);
+            const processor = await githubPostProcessor(config);
             
             for (const item of posts) {
 

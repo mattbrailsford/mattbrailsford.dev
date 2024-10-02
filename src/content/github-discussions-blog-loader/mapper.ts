@@ -1,6 +1,6 @@
 ﻿import type { GitHubActor, GitHubMappings, GitHubPost, GitHubPostSeries } from "./types.ts";
 
-export function gitHubMapper(mappings: GitHubMappings) {
+export function githubMapper(mappings: GitHubMappings) {
     
     const mapPosts = (data: any): GitHubPost[] => {
         return data.search.edges.map(mapPost);

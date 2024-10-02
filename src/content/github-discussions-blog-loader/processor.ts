@@ -6,7 +6,7 @@ import slugify from "slugify";
 import { readingTime } from "reading-time-estimator";
 import { stripHtml } from "string-strip-html";
 
-export async function gitHubPostProcessor(config: AstroConfig) {
+export async function githubPostProcessor(config: AstroConfig) {
     
     const markdownProcessor = await createMarkdownProcessor(config.markdown);
     
