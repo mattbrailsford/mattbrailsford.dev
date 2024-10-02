@@ -5,9 +5,15 @@
     border-radius: 0.75rem;
     line-height: 1.5;
 }
+
 pre.astro-code code {
     color: white;
     font-weight: 400;
+}
+
+pre.astro-code code span[style="color:#6A737D"] {
+    /* Force a more accessible code comment color */
+    color: #AFB5BB !important;
 }
 
 .visibly-hidden {
