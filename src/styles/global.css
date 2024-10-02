@@ -7,6 +7,7 @@
 }
 pre.astro-code code {
     color: white;
+    font-weight: 400;
 }
 
 .visibly-hidden {
