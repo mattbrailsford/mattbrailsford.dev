@@ -6,7 +6,7 @@ import slugify from "slugify";
 import { readingTime } from "reading-time-estimator";
 import { stripHtml } from "string-strip-html";
 
-export async function postProcessor(config: AstroConfig) {
+export async function gitHubPostProcessor(config: AstroConfig) {
     const markdownProcessor = await createMarkdownProcessor(config.markdown);
     return {
         process: async (input: GitHubPost) : Promise<{ 
@@ -18,18 +18,17 @@ export async function postProcessor(config: AstroConfig) {
             } 
         }> => {
             const { data: frontmatter, content: markdownContent } = matter(input.body);
-            const rendered = await markdownProcessor.render(markdownContent, { frontmatter });
-            return {
-                post: {
-                    ...input,
-                    slug: frontmatter?.slug ?? slugify(input.title, { lower: true }),
-                    description: frontmatter?.description ?? truncateAfter(stripHtml(rendered.code).result, 150),
-                    body: rendered.code,
-                    published: new Date(frontmatter?.published ?? input.createdAt),
-                    readingTime: readingTime(rendered.code, 250).text,
-                },
-                metadata: rendered.metadata
+            const { code : html, metadata} = await markdownProcessor.render(input.body);
+            const text = stripHtml(html).result;
+            const post = {
+                ...input,
+                slug: frontmatter?.slug ?? slugify(input.title, { lower: true }),
+                description: frontmatter?.description ?? truncateAfter(text, 150),
+                body: html,
+                published: new Date(frontmatter?.published ?? input.createdAt),
+                readingTime: readingTime(text, 240).text,
             };
+            return { post, metadata: { ...metadata, frontmatter } };
         }
     }
 }

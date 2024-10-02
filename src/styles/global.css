@@ -5,6 +5,9 @@
     border-radius: 0.75rem;
     line-height: 1.5;
 }
+pre.astro-code code {
+    color: white;
+}
 
 .visibly-hidden {
     position: absolute;

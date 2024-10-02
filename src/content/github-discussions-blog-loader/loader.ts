@@ -1,8 +1,8 @@
 ﻿import type { Loader } from 'astro/loaders';
 import { z } from "astro:content";
-import { GitHubClient } from "./client.ts";
+import { gitHubClient } from "./client.ts";
 import type { GitHubDiscussionsLoaderOptions, GitHubMappings } from "./types.ts";
-import {postProcessor} from "./processor.ts";
+import { gitHubPostProcessor } from "./processor.ts";
 
 export const DEFAULT_MAPPINGS : GitHubMappings = {
     blogPostCategory: "Blog Post",
@@ -26,7 +26,7 @@ export function githubDiscussionsBlogLoader({
                 logger.info(`Last Modified: ${lastModified}`);
             }
             
-            const client = new GitHubClient({ auth, repo, mappings });
+            const client = gitHubClient({ auth, repo, mappings });
             const posts = await client.getAllPosts(incremental ? lastModified : undefined);
             
             logger.info(`Processing ${posts.length} blog posts`);
@@ -37,7 +37,7 @@ export function githubDiscussionsBlogLoader({
                 store.clear();
             }
 
-            const processor = await postProcessor(config);
+            const processor = await gitHubPostProcessor(config);
             
             for (const item of posts) {
 
@@ -60,8 +60,7 @@ export function githubDiscussionsBlogLoader({
                     digest
                 });
                 
-                if (item.updated > maxUpdatedDate) 
-                {
+                if (item.updated > maxUpdatedDate) {
                     maxUpdatedDate = item.updated;
                 }
             }
@@ -76,7 +75,6 @@ export function githubDiscussionsBlogLoader({
             slug: z.string(),
             title: z.string(),
             description: z.string().optional(),
-            frontmatter: z.record(z.string(), z.unknown()).optional(),
             body: z.string(),
             created: z.date(),
             updated: z.date(),
