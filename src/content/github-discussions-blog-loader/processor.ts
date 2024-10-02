@@ -7,7 +7,15 @@ import { readingTime } from "reading-time-estimator";
 import { stripHtml } from "string-strip-html";
 
 export async function gitHubPostProcessor(config: AstroConfig) {
+    
     const markdownProcessor = await createMarkdownProcessor(config.markdown);
+    
+    const truncate = (str: string, length: number, delimiter: string = '...') : string => {
+        if (str.length <= length) return str;
+        const lastSpace = str.slice(0, length - delimiter.length + 1).lastIndexOf(' ');
+        return str.slice(0, lastSpace > 0 ? lastSpace : length - delimiter.length) + delimiter;
+    }
+    
     return {
         process: async (input: GitHubPost) : Promise<{ 
             post: Post,
@@ -23,7 +31,7 @@ export async function gitHubPostProcessor(config: AstroConfig) {
             const post = {
                 ...input,
                 slug: frontmatter?.slug ?? slugify(input.title, { lower: true }),
-                description: frontmatter?.description ?? truncateAfter(text, 150),
+                description: frontmatter?.description ?? truncate(text, 150),
                 body: html,
                 published: new Date(frontmatter?.published ?? input.createdAt),
                 readingTime: readingTime(text, 240).text,
@@ -31,10 +39,4 @@ export async function gitHubPostProcessor(config: AstroConfig) {
             return { post, metadata: { ...metadata, frontmatter } };
         }
     }
-}
-
-function truncateAfter(str: string, length: number, delimiter: string = '...') {
-    if (str.length <= length) return str;
-    const lastSpace = str.slice(0, length - delimiter.length + 1).lastIndexOf(' ');
-    return str.slice(0, lastSpace > 0 ? lastSpace : length - delimiter.length) + delimiter;
 }
