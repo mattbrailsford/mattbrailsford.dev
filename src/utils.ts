@@ -1,5 +1,5 @@
 ﻿import { getCollection } from "astro:content";
-import type { Post, PostSeries } from './types.ts';
+import type { Post, Series } from './types';
 
 export async function getBlogPosts(filter: (post: Post) => Boolean = () => true): Promise<Post[]> {
     return (await getCollection('blogPosts', (entry) => filter(entry.data))).map(x => x.data);
@@ -9,7 +9,7 @@ export async function getBlogTags(): Promise<string[]> {
     return distinct((await getBlogPosts()).flatMap(post => post.tags));
 }
 
-export async function getBlogSeries(): Promise<PostSeries[]> {
+export async function getBlogSeries(): Promise<Series[]> {
     return distinctBy((await getBlogPosts()).flatMap(x => x.series ?? []), series => series.id);
 }
 

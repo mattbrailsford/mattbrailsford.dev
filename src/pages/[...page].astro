@@ -2,12 +2,12 @@
 import Layout from '../layouts/Default.astro';
 import Pagination from "../components/Pagination.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
-import {getBlogPosts} from "../utils";
+import { getBlogPosts } from "../utils";
 import PostLink from "../components/PostLink.astro";
-import type {Post} from "../types";
-import type {Page} from "astro";
+import type { Post } from "../types";
+import type { Page } from "astro";
 import Intro from "../components/Intro.astro";
-import {sortPostsByPublishedDateDesc} from "../utils";
+import { sortPostsByPublishedDateDesc } from "../utils";
 
 interface Props {
     page: Page<Post>;

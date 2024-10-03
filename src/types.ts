@@ -1,1 +1,1 @@
-﻿export type { Post, PostSeries, PostActor } from './content/github-discussions-blog-loader';
+﻿export type { Post, Category, Series, Actor } from 'github-discussions-blog-loader';

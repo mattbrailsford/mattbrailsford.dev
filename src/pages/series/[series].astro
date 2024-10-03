@@ -1,15 +1,15 @@
 ﻿---
 import PostLink from "../../components/PostLink.astro";
 import Layout from "../../layouts/Default.astro";
-import type {PostSeries} from "../../types";
-import {getBlogSeries, getBlogPosts, sortPostsByPublishedDateAsc} from "../../utils";
+import type { Series } from "../../types";
+import { getBlogSeries, getBlogPosts, sortPostsByPublishedDateAsc } from "../../utils";
 
 interface Props {
-    series: PostSeries
+    series: Series
 }
     
 export const getStaticPaths = (async () => {
-    const series: PostSeries[] = await getBlogSeries();
+    const series: Series[] = await getBlogSeries();
     return series.map(s => ({
         params: {
             series: s.id

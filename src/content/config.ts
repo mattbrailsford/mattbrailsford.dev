@@ -1,5 +1,5 @@
 ﻿import { defineCollection } from 'astro:content';
-import { githubDiscussionsBlogLoader } from "./github-discussions-blog-loader";
+import { DEFAULT_MAPPINGS, githubDiscussionsBlogLoader } from 'github-discussions-blog-loader';
 
 const blogPosts = defineCollection({
     loader: githubDiscussionsBlogLoader({
@@ -8,7 +8,7 @@ const blogPosts = defineCollection({
             name: import.meta.env.GITHUB_REPO_NAME,
             owner: import.meta.env.GITHUB_REPO_OWNER,
         },
-        incremental: true,
+        incremental: false
     }),
 });
 

@@ -1,9 +1,9 @@
 ﻿---
-import type {PostSeries} from "../types";
+import type { Series } from "../types";
 import {getCollection} from "astro:content";
 import {sortPostsByPublishedDateAsc} from "../utils";
 
-export type Props = { series: PostSeries; currentSlug: string; class:string; }
+export type Props = { series: Series; currentSlug: string; class:string; }
 
 const { series, currentSlug, class: klass } = Astro.props;
 const posts = (await getCollection('blogPosts', (p) => p.data.series && p.data.series.id === series.id))

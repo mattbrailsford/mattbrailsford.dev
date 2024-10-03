@@ -1,9 +1,9 @@
 ﻿---
-import {getBlogPosts} from "../utils";
+import { getBlogPosts } from "../utils";
 import Layout from "../layouts/Default.astro";
 import FormattedDate from "../components/FormattedDate.astro";
+import type { Post } from "../types";
 import TagList from "../components/TagList.astro";
-import type {Post} from "../types";
 import Prose from "../components/Prose.astro";
 import SeriesLinks from "../components/SeriesLinks.astro";
 
@@ -12,7 +12,7 @@ interface Props {
 }
     
 export const getStaticPaths = (async () => {
-    const posts: Post[] = await getBlogPosts();
+    const posts = await getBlogPosts();
     return posts.map(post => ({
         params: {
             slug: post.slug

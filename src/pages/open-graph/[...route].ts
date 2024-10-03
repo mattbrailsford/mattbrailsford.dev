@@ -1,5 +1,5 @@
 ﻿import { OGImageRoute } from '../../../lib/astro-og-canvas';
-import {formatDate, getBlogPosts, getBlogSeries, getBlogTags} from "../../utils.ts";
+import { formatDate, getBlogPosts, getBlogSeries, getBlogTags } from "../../utils.ts";
 
 interface Routable {
     slug: string
