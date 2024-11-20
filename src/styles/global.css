@@ -16,6 +16,15 @@ pre.astro-code code span[style="color:#6A737D"] {
     color: #AFB5BB !important;
 }
 
+@media (min-width: 1000px) {
+    pre.astro-code {
+        position: relative;
+        left: 50%;
+        width: calc(100vw - 16rem);
+        margin-left: calc(-50vw + 8rem);
+    }
+}
+
 .visibly-hidden {
     position: absolute;
     left: -9999px;
