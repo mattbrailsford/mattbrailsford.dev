@@ -4,7 +4,6 @@ const { content } = Astro.props;
 
 ---
 <div class="prose 
-    prose-max-w-none 
     prose-slate 
     prose-lg
     prose-headings:font-display
@@ -25,7 +24,8 @@ const { content } = Astro.props;
     leading-7
     md:prose-xl
     md:prose-a:transition-colors
-    mt-8">
+    mt-8
+    max-w-none ">
     {content && (<div set:html={content}></div>)}
     <slot />
 </div>
