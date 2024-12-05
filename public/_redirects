@@ -1,4 +1,6 @@
 ﻿/building-a-blog-on-github-discussions /building-a-github-discussions-powered-blog 301
+/umb.fyi-gets-a-bluesky-tips-bot /umbfyi-gets-a-bluesky-tips-bot 301
+
 /rss /feed.xml 301
 /feed /feed.xml 200
 /tag/:tag/feed /tag/:tag/feed.xml 200
