@@ -2,3 +2,4 @@
 /rss /feed.xml 301
 /feed /feed.xml 200
 /tag/:tag/feed /tag/:tag/feed.xml 200
+/series/:series/feed /series/:series/feed.xml 200
