@@ -7,13 +7,17 @@ export interface Props {
     description?: string;
     image?: string;
     schema?: any;
+    feed?: {
+        title: string,
+        url: string
+    }
 }
 
 import Seo from './Seo.astro';
 import {SITE_TITLE} from "../consts";
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image, schema } = Astro.props;
+const { title, description, image, schema, feed } = Astro.props;
 ---
 
 <!-- Global Metadata -->
@@ -24,8 +28,11 @@ const { title, description, image, schema } = Astro.props;
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL.toString().replace(/.html?$/, '').replace(/\/+$/, '')} />
 
-<!-- RSS Feed -->
+<!-- RSS Feeds -->
 <link rel="alternate" type="application/rss+xml" title={ SITE_TITLE } href="/rss" />
+{feed && ( 
+    <link rel="alternate" type="application/rss+xml" title={ feed.title } href={ feed.url } />
+)}
 
 {schema && (
 <!-- Schema.org -->

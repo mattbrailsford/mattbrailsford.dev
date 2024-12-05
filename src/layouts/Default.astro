@@ -2,12 +2,12 @@
 import BaseHead from '../components/BaseHead.astro';
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-export type Props = { title: string; description?: string; image?: string, schema?: any };
-const { title, description, image, schema } = Astro.props;
+export type Props = { title: string; description?: string; image?: string, schema?: any, feed?:any };
+const { title, description, image, schema, feed } = Astro.props;
 ---
 <html lang="en">
 <head>
-    <BaseHead title={title} description={description} image={image} schema={schema} />
+    <BaseHead title={title} description={description} image={image} schema={schema} feed={feed} />
 </head>
 <body class="font-sans font-normal text-slate-700 tracking-normal">
     <Header />

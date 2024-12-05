@@ -1,5 +1,6 @@
 ﻿---
 import PostLink from "../../components/PostLink.astro";
+import { SITE_TITLE } from "../../consts";
 import Layout from "../../layouts/Default.astro";
 import { getBlogTags, getBlogPosts, sortPostsByPublishedDateDesc } from "../../utils";
 
@@ -21,8 +22,12 @@ const posts = (await getBlogPosts((post) => post.tags.includes(tag)))
     .sort(sortPostsByPublishedDateDesc);
 
 const ogImageUrl = new URL(`/open-graph/tag-${tag}.png`, Astro.site)
+const rssFeed = {
+    title: `Articles tagged #${ tag } - ${ SITE_TITLE }`,
+    url: `/tag/${tag}/feed`
+}
 ---
-<Layout title={`${tag}`} description={`Posts tagged #${tag}`} image={ogImageUrl.toString()}>
+<Layout title={`${tag}`} description={`Posts tagged #${tag}`} image={ogImageUrl.toString()} feed={rssFeed}>
     <div class="w-full py-7 md:py-8">
         <h1 class="font-display text-3xl text-black font-extrabold mb-8 md:text-6xl md:leading-[1.1] md:text-center"><span class="visibly-hidden">Posts tagged </span>#{tag}</h1>
         <ul>
