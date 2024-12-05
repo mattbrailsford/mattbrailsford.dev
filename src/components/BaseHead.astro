@@ -29,7 +29,7 @@ const { title, description, image, schema, feed } = Astro.props;
 <link rel="canonical" href={canonicalURL.toString().replace(/.html?$/, '').replace(/\/+$/, '')} />
 
 <!-- RSS Feeds -->
-<link rel="alternate" type="application/rss+xml" title={ SITE_TITLE } href="/rss" />
+<link rel="alternate" type="application/rss+xml" title={ SITE_TITLE } href="/feed" />
 {feed && ( 
     <link rel="alternate" type="application/rss+xml" title={ feed.title } href={ feed.url } />
 )}
