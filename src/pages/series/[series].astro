@@ -1,5 +1,6 @@
 ﻿---
 import PostLink from "../../components/PostLink.astro";
+import { SITE_TITLE } from "../../consts";
 import Layout from "../../layouts/Default.astro";
 import type { Series } from "../../types";
 import { getBlogSeries, getBlogPosts, sortPostsByPublishedDateAsc } from "../../utils";
@@ -25,8 +26,12 @@ const posts = (await getBlogPosts((post) => post.series?.id === series.id))
     .sort(sortPostsByPublishedDateAsc);
 
 const ogImageUrl = new URL(`/open-graph/series-${series.id}.png`, Astro.site)
+const rssFeed = {
+    title: `Posts from the '${ series.name }' series - ${ SITE_TITLE }`,
+    url: `/series/${series.id}/feed`
+}
 ---
-<Layout title={series!.name} description={`Posts from the ${series!.name} series`} image={ogImageUrl.toString()}>
+<Layout title={series!.name} description={`Posts from the ${series!.name} series`} image={ogImageUrl.toString()} feed={rssFeed}>
     <h1 class="visibly-hidden">Posts from the '{series!.name}' series</h1>
     <ul>
         {posts.map(post => (
