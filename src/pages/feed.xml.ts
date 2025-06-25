@@ -4,7 +4,7 @@ import { getBlogPosts, sortPostsByPublishedDateDesc } from "../utils";
 import type { APIContext } from 'astro';
 
 export async function GET(context:APIContext) {
-    const rssUrl  = new URL('/rss', context.site);
+    const rssUrl  = new URL('/feed', context.site);
     const posts = (await getBlogPosts())
         .sort(sortPostsByPublishedDateDesc);
     return await rss({
