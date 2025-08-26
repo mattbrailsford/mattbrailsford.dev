@@ -8,6 +8,7 @@ env:
   SCHEDULED_LABEL: "state/scheduled"                   # Label name that marks posts as scheduled for future
   RSS_FEED_URL: "https://mattbrailsford.dev/feed.xml"  # Your RSS feed URL
   DISCUSSION_ID_TAG: "github:discussionId"             # XML tag name in RSS for discussion ID
+  TIMEZONE_LOCATION: "Europe/London"                   # IANA timezone (auto-handles GMT/BST)
 
 on:
   # Check for scheduled posts every 15 minutes
@@ -24,6 +25,11 @@ on:
 jobs:
   check-and-publish:
     runs-on: ubuntu-latest
+    # Skip if this is any state/scheduled label change (both adding and removing)
+    if: |
+      github.event_name != 'discussion' ||
+      (github.event.action != 'labeled' && github.event.action != 'unlabeled') ||
+      github.event.label.name != 'state/scheduled'
     steps:
       - name: Check for posts ready to publish
         uses: actions/github-script@v7
@@ -39,7 +45,9 @@ jobs:
               draftLabel: process.env.DRAFT_LABEL,
               scheduledLabel: process.env.SCHEDULED_LABEL,
               rssFeedUrl: process.env.RSS_FEED_URL,
-              discussionIdTag: process.env.DISCUSSION_ID_TAG
+              discussionIdTag: process.env.DISCUSSION_ID_TAG,
+              timezoneLocation: process.env.TIMEZONE_LOCATION || 'UTC',
+              defaultTimezone: process.env.DEFAULT_TIMEZONE  // Fallback for manual offset
             };
             
             // ===== UTILITY FUNCTIONS =====
@@ -90,6 +98,94 @@ jobs:
                   return false;
                 }
               },
+
+              getCurrentTimezoneOffset()
+              {
+                // Get current offset for the configured timezone
+                const now = new Date();
+                const utc = new Date(now.getTime() + (now.getTimezoneOffset() * 60000));
+                const localTime = new Date(utc.toLocaleString('en-US', { timeZone: CONFIG.timezoneLocation }));
+                const offset = (localTime.getTime() - utc.getTime()) / (1000 * 60); // offset in minutes
+                
+                // Convert to timezone string format (+HH:MM or -HH:MM)
+                const hours = Math.floor(Math.abs(offset) / 60);
+                const minutes = Math.abs(offset) % 60;
+                const sign = offset >= 0 ? '+' : '-';
+                
+                return `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+              },
+
+              parseDateTime(dateStr) 
+              {
+                console.log(`Parsing date string: "${dateStr}"`);
+                
+                try 
+                {
+                  // Check if it already has timezone info
+                  if (dateStr.includes('Z') || dateStr.match(/[+-]\d{2}:\d{2}$/)) {
+                    console.log('Date has explicit timezone info');
+                    const publishDate = new Date(dateStr);
+                    
+                    if (isNaN(publishDate.getTime())) {
+                      console.log(`❌ Invalid date format: "${dateStr}"`);
+                      return null;
+                    }
+                    
+                    console.log(`✅ Parsed with timezone: ${publishDate.toISOString()}`);
+                    return publishDate;
+                  }
+                  
+                  // No timezone info, apply location-based timezone
+                  let timezoneOffset;
+                  
+                  if (CONFIG.timezoneLocation && CONFIG.timezoneLocation !== 'UTC') {
+                    // Use location-based timezone (handles DST automatically)
+                    timezoneOffset = this.getCurrentTimezoneOffset();
+                    console.log(`No timezone info, applying ${CONFIG.timezoneLocation} timezone: ${timezoneOffset}`);
+                    
+                    // Check if we're in DST
+                    const testDate = new Date(dateStr + 'T12:00:00');
+                    const isDST = testDate.getTimezoneOffset() < new Date(testDate.getFullYear(), 0, 1).getTimezoneOffset();
+                    console.log(`DST status for date: ${isDST ? 'Summer Time' : 'Standard Time'}`);
+                  } else {
+                    // Default to UTC
+                    timezoneOffset = '+00:00';
+                    console.log(`No timezone configured, defaulting to UTC`);
+                  }
+                  
+                  const dateWithTz = `${dateStr}${timezoneOffset}`;
+                  console.log(`Full date string: "${dateWithTz}"`);
+                  
+                  const publishDate = new Date(dateWithTz);
+                  
+                  if (isNaN(publishDate.getTime())) {
+                    console.log(`❌ Invalid date format: "${dateWithTz}"`);
+                    return null;
+                  }
+                  
+                  console.log(`✅ Parsed with timezone: ${publishDate.toISOString()}`);
+                  
+                  // Show what this means in local time
+                  if (CONFIG.timezoneLocation !== 'UTC') {
+                    const localTimeStr = publishDate.toLocaleString('en-GB', { 
+                      timeZone: CONFIG.timezoneLocation,
+                      weekday: 'short',
+                      year: 'numeric',
+                      month: 'short', 
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      timeZoneName: 'short'
+                    });
+                    console.log(`Local time: ${localTimeStr}`);
+                  }
+                  
+                  return publishDate;
+                } catch (error) {
+                  console.log(`❌ Error parsing date "${dateStr}": ${error.message}`);
+                  return null;
+                }
+              },
               
               parsePublishDate(discussion, now) 
               {
@@ -104,13 +200,16 @@ jobs:
                 }
 
                 const publishedStr = publishedMatch[1].trim();
-                const publishDate = new Date(publishedStr);
-                if (isNaN(publishDate.getTime())) {
+                console.log(`Found published field: "${publishedStr}"`);
+                
+                const parsedDate = this.parseDateTime(publishedStr);
+                if (!parsedDate) {
+                  console.log('Failed to parse date, defaulting to now');
                   return { publishDate: now, hasExplicitDate: false };
                 }
                 
                 return { 
-                  publishDate: publishDate, 
+                  publishDate: parsedDate, 
                   hasExplicitDate: true 
                 };
               },
@@ -151,7 +250,7 @@ jobs:
                     repo: context.repo.repo
                   });
                   
-                  const scheduledLabelObj = labelsQuery.data.find(label => label.name === CONFIG.scheduledLabel);
+                  let scheduledLabelObj = labelsQuery.data.find(label => label.name === CONFIG.scheduledLabel);
                   
                   if (!scheduledLabelObj) {
                     console.log(`Creating ${CONFIG.scheduledLabel} label...`);
@@ -190,7 +289,7 @@ jobs:
                     labelIds: [scheduledLabelObj.node_id]
                   });
                   
-                  console.log(`Added ${CONFIG.scheduledLabel} label to discussion #${discussionNumber}`);
+                  console.log(`✅ Added ${CONFIG.scheduledLabel} label to discussion #${discussionNumber}`);
                 } catch (error) {
                   console.warn(`Failed to add scheduled label: ${error.message}`);
                 }
@@ -249,7 +348,7 @@ jobs:
                     labelIds: [scheduledLabelObj.node_id]
                   });
                   
-                  console.log(`Removed ${CONFIG.scheduledLabel} label from discussion #${discussionNumber}`);
+                  console.log(`✅ Removed ${CONFIG.scheduledLabel} label from discussion #${discussionNumber}`);
                 } catch (error) {
                   console.log(`Could not remove scheduled label: ${error.message} (may not exist)`);
                 }
@@ -268,12 +367,22 @@ jobs:
             {
               const discussion = context.payload.discussion;
               console.log(`Discussion event: #${discussion.number} - "${discussion.title}"`);
-              
-              // Skip our own scheduled label changes (avoid infinite loops)
+
+              // Handle label events - only process draft label changes now
               if (context.payload.action === 'labeled' || context.payload.action === 'unlabeled') {
                 const changedLabel = context.payload.label?.name;
-                if (changedLabel === CONFIG.scheduledLabel) {
-                  console.log(`Skipping - this is our own ${changedLabel} label change`);
+                
+                if (changedLabel === CONFIG.draftLabel) {
+                  if (context.payload.action === 'unlabeled') {
+                    console.log(`📝 Draft label removed from "${discussion.title}" - checking if ready to publish`);
+                    // Continue with normal processing
+                  } else {
+                    console.log(`📋 Draft label added to "${discussion.title}" - post is now draft`);
+                    await utils.removeScheduledLabel(discussion.number);
+                    return;
+                  }
+                } else {
+                  console.log(`Label change (${changedLabel}) not relevant to publishing, skipping`);
                   return;
                 }
               }
