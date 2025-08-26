@@ -96,7 +96,7 @@ jobs:
                 console.log('=== PARSING PUBLISH DATE ===');
                 console.log(`Discussion body preview: ${discussion.body.substring(0, 200)}...`);
 
-                const frontmatterMatch = discussion.body.match(/^---\n([\s\S]*?)\n---/);
+                const frontmatterMatch = discussion.body.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(\r?\n|$)/);
                 if (!frontmatterMatch) {
                   console.log('❌ No frontmatter block found (no --- delimiters)');
                   return { publishDate: now, hasExplicitDate: false };
