@@ -287,12 +287,24 @@ jobs:
             // Scheduled/manual run: scan scheduled posts
             console.log('🔍 Checking discussions with scheduled label...');
             const result = await github.graphql(`
-              query($repo: String!, $owner: String!, $category: String!, $label: String!) {
-                search(query: "repo:$owner/$repo category:\\"$category\\" label:$label", type: DISCUSSION, first: 100) {
-                  edges { node { ... on Discussion { id number title body createdAt } } }
+              query($q: String!) {
+                search(query: $q, type: DISCUSSION, first: 100) {
+                  edges {
+                    node {
+                      ... on Discussion {
+                        id
+                        number
+                        title
+                        body
+                        createdAt
+                      }
+                    }
+                  }
                 }
               }`,
-              { repo: context.repo.repo, owner: context.repo.owner, category: CONFIG.blogCategory, label: CONFIG.scheduledLabel }
+              {
+                q: `repo:${context.repo.owner}/${context.repo.repo} category:"${CONFIG.blogCategory}" label:${CONFIG.scheduledLabel}`
+              }
             );
 
             if (!result.search.edges.length) {
