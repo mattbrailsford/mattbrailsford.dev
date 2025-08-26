@@ -103,6 +103,7 @@ jobs:
                   return { publishDate: now, hasExplicitDate: false };
                 }
                 
+                const publishedStr = publishedMatch[1].trim();
                 const publishDate = new Date(publishedStr);
                 if (isNaN(publishDate.getTime())) {
                   return { publishDate: now, hasExplicitDate: false };
