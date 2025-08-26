@@ -115,8 +115,8 @@ jobs:
                   return { publishDate: now, hasExplicitDate: false };
                 }
 
-                console.log(`✅ Found published field: "${publishedStr}"`);
-                console.log(`Match details: full match = "${publishedMatch[0]}", captured = "${publishedMatch[1]}"`);
+                const publishedStr = publishedMatch[1].trim();
+                console.log(`✅ Found published field (alt): "${publishedStr}"`);
                 
                 const publishDate = new Date(publishedStr);
                   
