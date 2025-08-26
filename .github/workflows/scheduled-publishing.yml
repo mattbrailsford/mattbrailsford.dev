@@ -1,0 +1,322 @@
+# .github/workflows/scheduled-publishing.yml
+name: Scheduled Publishing
+
+# Configuration - customize these values for your setup
+env:
+  BLOG_CATEGORY: "Blog Post"                           # GitHub Discussions category name for blog posts
+  DRAFT_LABEL: "state/draft"                           # Label name that marks posts as drafts
+  SCHEDULED_LABEL: "state/scheduled"                   # Label name that marks posts as scheduled for future
+  RSS_FEED_URL: "https://mattbrailsford.dev/feed.xml"  # Your RSS feed URL
+  DISCUSSION_ID_TAG: "github:discussionId"             # XML tag name in RSS for discussion ID
+
+on:
+  # Check for scheduled posts every 15 minutes
+  schedule:
+    - cron: '*/15 * * * *'
+  
+  # Immediate check when discussions change
+  discussion:
+    types: [created, edited, labeled, unlabeled]
+  
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  check-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for posts ready to publish
+        uses: actions/github-script@v7
+        env:
+          NETLIFY_HOOK_URL: ${{ secrets.NETLIFY_BUILD_HOOK }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+
+            // Configuration from environment variables
+            const CONFIG = {
+              blogCategory: process.env.BLOG_CATEGORY,
+              draftLabel: process.env.DRAFT_LABEL,
+              scheduledLabel: process.env.SCHEDULED_LABEL,
+              rssFeedUrl: process.env.RSS_FEED_URL,
+              discussionIdTag: process.env.DISCUSSION_ID_TAG
+            };
+            
+            // ===== UTILITY FUNCTIONS =====
+            const utils = {
+              _rssPromise: null, 
+              
+              async fetchRSSContent() 
+              {
+                // If we already have a fetch in progress, wait for it
+                if (this._rssPromise) {
+                  return await this._rssPromise;
+                }
+                
+                // Start the fetch and cache the Promise
+                this._rssPromise = (async () => {
+                  try {
+                    console.log('Fetching RSS feed...');
+                    const response = await fetch(CONFIG.rssFeedUrl);
+                    if (!response.ok) {
+                      console.warn(`RSS fetch failed: ${response.status}`);
+                      return false;
+                    }
+                    return await response.text();
+                  } catch (error) {
+                    console.error('Error fetching RSS:', error.message);
+                    return false;
+                  }
+                })();
+                
+                return await this._rssPromise;
+              },
+              
+              async checkRSSForPost(discussionId) 
+              {
+                const rssContent = await this.fetchRSSContent();
+                if (!rssContent) return false;
+                return rssContent.includes(`<${CONFIG.discussionIdTag}>${discussionId}</${CONFIG.discussionIdTag}>`);
+              },
+              
+              async triggerBuild(reason = '') 
+              {
+                try {
+                  await fetch(process.env.NETLIFY_HOOK_URL, { method: 'POST' });
+                  console.log(`✅ Build triggered${reason ? ': ' + reason : ''}`);
+                  return true;
+                } catch (error) {
+                  console.error('❌ Error triggering build:', error.message);
+                  return false;
+                }
+              },
+              
+              parsePublishDate(discussion, now) 
+              {
+                const frontmatterMatch = discussion.body.match(/^---\n([\s\S]*?)\n---/);
+                
+                if (!frontmatterMatch) {
+                  return { publishDate: now, hasExplicitDate: false };
+                }
+                
+                const publishedMatch = frontmatterMatch[1].match(/published:\s*(.+)/);
+                
+                if (!publishedMatch) {
+                  return { publishDate: now, hasExplicitDate: false };
+                }
+                
+                return { 
+                  publishDate: new Date(publishedMatch[1].trim()), 
+                  hasExplicitDate: true 
+                };
+              },
+              
+              isValidBlogPost(discussion) 
+              {
+                // Check category
+                if (discussion.category?.name !== CONFIG.blogCategory) {
+                  return { valid: false, reason: `Not a ${CONFIG.blogCategory} post` };
+                }
+                
+                // Check draft status
+                if (discussion.labels?.some(label => label.name === CONFIG.draftLabel)) {
+                  return { valid: false, reason: 'Post is draft' };
+                }
+                
+                return { valid: true };
+              },
+              
+              async addScheduledLabel(discussionNumber) 
+              {
+                try {
+                  await github.rest.issues.addLabelsToIssue({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: discussionNumber,
+                    labels: [CONFIG.scheduledLabel]
+                  });
+                  console.log(`Added ${CONFIG.scheduledLabel} label to discussion #${discussionNumber}`);
+                } catch (error) {
+                  console.warn(`Failed to add scheduled label: ${error.message}`);
+                }
+              },
+              
+              async removeScheduledLabel(discussionNumber) 
+              {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: discussionNumber,
+                    name: CONFIG.scheduledLabel
+                  });
+                  console.log(`Removed ${CONFIG.scheduledLabel} label from discussion #${discussionNumber}`);
+                } catch (error) {
+                  // Label might not exist, that's fine
+                  console.log(`Scheduled label not found on discussion #${discussionNumber} (already removed)`);
+                }
+              }
+            };
+            
+            // ===== MAIN LOGIC =====
+            
+            const eventType = context.eventName;
+            const now = new Date();
+            
+            console.log(`🚀 Running ${eventType} workflow at ${now.toISOString()}`);
+            
+            // If this is a discussion event, check if we should handle it
+            if (eventType === 'discussion') 
+            {
+              const discussion = context.payload.discussion;
+              console.log(`Discussion event: #${discussion.number} - "${discussion.title}"`);
+              
+              // Skip our own scheduled label changes (avoid infinite loops)
+              if (context.payload.action === 'labeled' || context.payload.action === 'unlabeled') {
+                const changedLabel = context.payload.label?.name;
+                if (changedLabel === CONFIG.scheduledLabel) {
+                  console.log(`Skipping - this is our own ${changedLabel} label change`);
+                  return;
+                }
+              }
+
+              // Validate this is a publishable blog post
+              const validation = utils.isValidBlogPost(discussion);
+              if (!validation.valid) {
+                console.log(validation.reason + ', skipping');
+                return;
+              }
+              
+              // Parse publish date
+              const { publishDate, hasExplicitDate } = utils.parsePublishDate(discussion, now);
+              console.log(`Published date: ${publishDate.toISOString()}${!hasExplicitDate ? ' (defaulted to now)' : ''}`);
+              
+              // If not ready yet, add scheduled label and skip
+              if (publishDate > now) {
+                const timeUntil = Math.round((publishDate - now) / (1000 * 60));
+                console.log(`Post scheduled for future (${timeUntil} minutes from now), will be published by scheduled check`);
+                await utils.addScheduledLabel(discussion.number);
+                return;
+              }
+              
+              // If we get here, post should be published now
+              // Remove scheduled label if it exists
+              await utils.removeScheduledLabel(discussion.number);
+              
+              // Check if already published
+              console.log('Post should be published now, checking RSS...');
+              const isPublished = await utils.checkRSSForPost(discussion.id);
+              
+              if (isPublished) {
+                console.log('Post already published in RSS');
+                return;
+              }
+              
+              // Trigger immediate build
+              console.log(`📝 Triggering immediate build for "${discussion.title}"`);
+              await utils.triggerBuild(`immediate publish`);
+              return;
+            }
+            else
+            {
+              // Scheduled or manual run - check only scheduled discussions
+              console.log('🔍 Checking discussions with scheduled label...');
+              
+              const query = `
+                query {
+                  search(query: "repo:${{ github.repository }} category:\\"${CONFIG.blogCategory}\\" label:${CONFIG.scheduledLabel}", type: DISCUSSION, first: 100) {
+                    edges {
+                      node {
+                        ... on Discussion {
+                          id
+                          number
+                          title
+                          body
+                          createdAt
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+              
+              const result = await github.graphql(query);
+              
+              if (!result.search.edges.length) {
+                console.log(`No posts with ${CONFIG.scheduledLabel} label found`);
+                return;
+              }
+              
+              const readyPosts = [];
+              const stillScheduledPosts = [];
+              
+              // Check which scheduled posts are now ready
+              for (const edge of result.search.edges) {
+                const discussion = edge.node;
+                const { publishDate } = utils.parsePublishDate(discussion, now);
+                
+                if (publishDate <= now) {
+                  readyPosts.push({
+                    id: discussion.id,
+                    title: discussion.title,
+                    number: discussion.number,
+                    publishedDate: publishDate
+                  });
+                } else {
+                  stillScheduledPosts.push({
+                    title: discussion.title,
+                    number: discussion.number,
+                    publishedDate: publishDate
+                  });
+                }
+              }
+              
+              // Log still-scheduled posts for visibility
+              if (stillScheduledPosts.length > 0) {
+                console.log(`📅 ${stillScheduledPosts.length} posts still scheduled for future:`);
+                stillScheduledPosts
+                  .sort((a, b) => a.publishedDate - b.publishedDate)
+                  .forEach(post => {
+                    const timeUntil = Math.round((post.publishedDate - now) / (1000 * 60));
+                    console.log(`- "${post.title}" in ${timeUntil} minutes (${post.publishedDate.toISOString()})`);
+                  });
+              }
+              
+              if (readyPosts.length === 0) {
+                console.log('No posts ready to publish now');
+                return;
+              }
+              
+              console.log(`Found ${readyPosts.length} posts that should be published:`);
+              readyPosts.forEach(post => {
+                console.log(`- "${post.title}" (Discussion #${post.number})`);
+              });
+              
+              // Check RSS to see what's already published
+              console.log('Checking for already published posts...');
+              
+              const unpublishedPosts = [];
+              for (const post of readyPosts) {
+                const isPublished = await utils.checkRSSForPost(post.id);
+                if (!isPublished) {
+                  unpublishedPosts.push(post);
+                }
+              }
+              
+              if (unpublishedPosts.length === 0) {
+                console.log('All ready posts are already published');
+                return;
+              }
+              
+              // Remove scheduled labels from posts that are being published
+              console.log('Removing scheduled labels from posts being published...');
+              for (const post of unpublishedPosts) {
+                await utils.removeScheduledLabel(post.number);
+              }
+              
+              const titles = unpublishedPosts.map(p => p.title).join('", "');
+              console.log(`📝 Triggering build for ${unpublishedPosts.length} unpublished posts: "${titles}"`);
+              
+              // Trigger build
+              await utils.triggerBuild(`scheduled publish`);
+            }
