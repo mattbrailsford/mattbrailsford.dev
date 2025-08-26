@@ -33,8 +33,7 @@ jobs:
           github.event.action == 'edited' ||
           (
             (github.event.action == 'labeled' || github.event.action == 'unlabeled') &&
-            github.event.label.name != env.SCHEDULED_LABEL &&
-            !contains(env.IGNORE_LABELS, github.event.label.name)
+            github.event.label.name != env.SCHEDULED_LABEL
           )
         env:
           NETLIFY_HOOK_URL: ${{ secrets.NETLIFY_BUILD_HOOK }}
