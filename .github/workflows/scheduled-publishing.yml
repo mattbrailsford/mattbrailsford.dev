@@ -30,7 +30,7 @@ jobs:
         env:
           NETLIFY_HOOK_URL: ${{ secrets.NETLIFY_BUILD_HOOK }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_PAT_TOKEN }}  # ← Use PAT instead
           script: |
 
             // Configuration from environment variables
@@ -102,7 +102,7 @@ jobs:
                 if (!publishedMatch) {
                   return { publishDate: now, hasExplicitDate: false };
                 }
-                
+
                 const publishedStr = publishedMatch[1].trim();
                 const publishDate = new Date(publishedStr);
                 if (isNaN(publishDate.getTime())) {
