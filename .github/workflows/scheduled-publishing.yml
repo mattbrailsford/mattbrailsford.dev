@@ -93,20 +93,45 @@ jobs:
               
               parsePublishDate(discussion, now) 
               {
+                console.log('=== PARSING PUBLISH DATE ===');
+                console.log(`Discussion body preview: ${discussion.body.substring(0, 200)}...`);
+
                 const frontmatterMatch = discussion.body.match(/^---\n([\s\S]*?)\n---/);
-                
                 if (!frontmatterMatch) {
+                  console.log('❌ No frontmatter block found (no --- delimiters)');
                   return { publishDate: now, hasExplicitDate: false };
                 }
                 
+                console.log('✅ Frontmatter block found');
+                console.log(`Raw frontmatter: ${frontmatterMatch[1]}`);
+
                 const publishedMatch = frontmatterMatch[1].match(/published:\s*(.+)/);
-                
                 if (!publishedMatch) {
+                  console.log('❌ No "published:" field found in frontmatter');
+                  console.log('Available frontmatter lines:');
+                  frontmatterMatch[1].split('\n').forEach((line, i) => {
+                    console.log(`  ${i + 1}: "${line}"`);
+                  });
                   return { publishDate: now, hasExplicitDate: false };
                 }
+
+                console.log(`✅ Found published field: "${publishedStr}"`);
+                console.log(`Match details: full match = "${publishedMatch[0]}", captured = "${publishedMatch[1]}"`);
+                
+                const publishDate = new Date(publishedStr);
+                  
+                // Check if date parsing was successful
+                if (isNaN(publishDate.getTime())) {
+                  console.log(`❌ Invalid date format: "${publishedStr}", defaulting to now`);
+                  return { publishDate: now, hasExplicitDate: false };
+                }
+                
+                console.log(`✅ Successfully parsed: ${publishDate.toISOString()}`);
+                console.log(`Current time: ${now.toISOString()}`);
+                console.log(`Is future: ${publishDate > now}`);
                 
                 return { 
-                  publishDate: new Date(publishedMatch[1].trim()), 
+                  publishDate: publishDate, 
                   hasExplicitDate: true 
                 };
               },
