@@ -4,10 +4,8 @@ name: Scheduled Publishing
 # Configuration - customize these values for your setup
 env:
   BLOG_CATEGORY: "Blog Post"                           # GitHub Discussions category name for blog posts
-  DRAFT_LABEL: "state/draft"                           # Label name that marks posts as drafts
+  IGNORE_LABELS: "state/draft"                         # Comma-separated labels to ignore (posts with these won't be published)
   SCHEDULED_LABEL: "state/scheduled"                   # Label name that marks posts as scheduled for future
-  RSS_FEED_URL: "https://mattbrailsford.dev/feed.xml"  # Your RSS feed URL
-  DISCUSSION_ID_TAG: "github:discussionId"             # XML tag name in RSS for discussion ID
   TIMEZONE_LOCATION: "Europe/London"                   # IANA timezone (auto-handles GMT/BST)
 
 on:
@@ -25,11 +23,11 @@ on:
 jobs:
   check-and-publish:
     runs-on: ubuntu-latest
-    # Skip if this is any state/scheduled label change (both adding and removing)
+    # Skip if this is any scheduled label change (both adding and removing)
     if: |
       github.event_name != 'discussion' ||
       (github.event.action != 'labeled' && github.event.action != 'unlabeled') ||
-      github.event.label.name != 'state/scheduled'
+      github.event.label.name != env.SCHEDULED_LABEL
     steps:
       - name: Check for posts ready to publish
         uses: actions/github-script@v7
@@ -42,51 +40,15 @@ jobs:
             // Configuration from environment variables
             const CONFIG = {
               blogCategory: process.env.BLOG_CATEGORY,
-              draftLabel: process.env.DRAFT_LABEL,
+              ignoreLabels: (process.env.IGNORE_LABELS || '').split(',').map(label => label.trim()).filter(Boolean),
               scheduledLabel: process.env.SCHEDULED_LABEL,
-              rssFeedUrl: process.env.RSS_FEED_URL,
-              discussionIdTag: process.env.DISCUSSION_ID_TAG,
               timezoneLocation: process.env.TIMEZONE_LOCATION || 'UTC',
               defaultTimezone: process.env.DEFAULT_TIMEZONE  // Fallback for manual offset
             };
             
             // ===== UTILITY FUNCTIONS =====
             const utils = {
-              _rssPromise: null, 
-              
-              async fetchRSSContent() 
-              {
-                // If we already have a fetch in progress, wait for it
-                if (this._rssPromise) {
-                  return await this._rssPromise;
-                }
-                
-                // Start the fetch and cache the Promise
-                this._rssPromise = (async () => {
-                  try {
-                    console.log('Fetching RSS feed...');
-                    const response = await fetch(CONFIG.rssFeedUrl);
-                    if (!response.ok) {
-                      console.warn(`RSS fetch failed: ${response.status}`);
-                      return false;
-                    }
-                    return await response.text();
-                  } catch (error) {
-                    console.error('Error fetching RSS:', error.message);
-                    return false;
-                  }
-                })();
-                
-                return await this._rssPromise;
-              },
-              
-              async checkRSSForPost(discussionId) 
-              {
-                const rssContent = await this.fetchRSSContent();
-                if (!rssContent) return false;
-                return rssContent.includes(`<${CONFIG.discussionIdTag}>${discussionId}</${CONFIG.discussionIdTag}>`);
-              },
-              
+
               async triggerBuild(reason = '') 
               {
                 try {
@@ -99,7 +61,7 @@ jobs:
                 }
               },
 
-              getCurrentTimezoneOffset()
+              getCurrentTimezoneOffset() 
               {
                 // Get current offset for the configured timezone
                 const now = new Date();
@@ -138,7 +100,8 @@ jobs:
                   // No timezone info, apply location-based timezone
                   let timezoneOffset;
                   
-                  if (CONFIG.timezoneLocation && CONFIG.timezoneLocation !== 'UTC') {
+                  if (CONFIG.timezoneLocation && CONFIG.timezoneLocation !== 'UTC') 
+                  {
                     // Use location-based timezone (handles DST automatically)
                     timezoneOffset = this.getCurrentTimezoneOffset();
                     console.log(`No timezone info, applying ${CONFIG.timezoneLocation} timezone: ${timezoneOffset}`);
@@ -147,7 +110,9 @@ jobs:
                     const testDate = new Date(dateStr + 'T12:00:00');
                     const isDST = testDate.getTimezoneOffset() < new Date(testDate.getFullYear(), 0, 1).getTimezoneOffset();
                     console.log(`DST status for date: ${isDST ? 'Summer Time' : 'Standard Time'}`);
-                  } else {
+                  }
+                  else 
+                  {
                     // Default to UTC
                     timezoneOffset = '+00:00';
                     console.log(`No timezone configured, defaulting to UTC`);
@@ -221,9 +186,17 @@ jobs:
                   return { valid: false, reason: `Not a ${CONFIG.blogCategory} post` };
                 }
                 
-                // Check draft status
-                if (discussion.labels?.some(label => label.name === CONFIG.draftLabel)) {
-                  return { valid: false, reason: 'Post is draft' };
+                // Check for any ignore labels
+                const postLabels = discussion.labels?.map(label => label.name) || [];
+                const hasIgnoreLabel = CONFIG.ignoreLabels.some(ignoreLabel => 
+                  postLabels.includes(ignoreLabel)
+                );
+                
+                if (hasIgnoreLabel) {
+                  const matchedLabels = CONFIG.ignoreLabels.filter(ignoreLabel => 
+                    postLabels.includes(ignoreLabel)
+                  );
+                  return { valid: false, reason: `Post has ignore label(s): ${matchedLabels.join(', ')}` };
                 }
                 
                 return { valid: true };
@@ -368,18 +341,17 @@ jobs:
               const discussion = context.payload.discussion;
               console.log(`Discussion event: #${discussion.number} - "${discussion.title}"`);
 
-              // Handle label events - only process draft label changes now
+              // Handle label events - process ignore label changes
               if (context.payload.action === 'labeled' || context.payload.action === 'unlabeled') {
                 const changedLabel = context.payload.label?.name;
-                
-                if (changedLabel === CONFIG.draftLabel) {
-                  if (context.payload.action === 'unlabeled') {
-                    console.log(`📝 Draft label removed from "${discussion.title}" - checking if ready to publish`);
-                    // Continue with normal processing
-                  } else {
-                    console.log(`📋 Draft label added to "${discussion.title}" - post is now draft`);
+                if (CONFIG.ignoreLabels.includes(changedLabel)) {
+                  if (context.payload.action === 'labeled') {
+                    console.log(`📋 Ignore label "${changedLabel}" added to "${discussion.title}" - post will be ignored`);
                     await utils.removeScheduledLabel(discussion.number);
                     return;
+                  } else {
+                    console.log(`📝 Ignore label "${changedLabel}" removed from "${discussion.title}" - checking if ready to publish`);
+                    // Continue with normal processing
                   }
                 } else {
                   console.log(`Label change (${changedLabel}) not relevant to publishing, skipping`);
@@ -410,16 +382,8 @@ jobs:
               // Remove scheduled label if it exists
               await utils.removeScheduledLabel(discussion.number);
               
-              // Check if already published
-              console.log('Post should be published now, checking RSS...');
-              const isPublished = await utils.checkRSSForPost(discussion.id);
-              
-              if (isPublished) {
-                console.log('Post already published in RSS');
-                return;
-              }
-              
-              // Trigger immediate build
+              // Trigger immediate build - no RSS check needed
+              // (if discussion was edited, we want fresh build regardless)
               console.log(`📝 Triggering immediate build for "${discussion.title}"`);
               await utils.triggerBuild(`immediate publish`);
               return;
@@ -499,30 +463,14 @@ jobs:
                 console.log(`- "${post.title}" (Discussion #${post.number})`);
               });
               
-              // Check RSS to see what's already published
-              console.log('Checking for already published posts...');
-              
-              const unpublishedPosts = [];
+              // For scheduled posts, trust the label and publish immediately
+              console.log('Removing scheduled labels and triggering build...');
               for (const post of readyPosts) {
-                const isPublished = await utils.checkRSSForPost(post.id);
-                if (!isPublished) {
-                  unpublishedPosts.push(post);
-                }
-              }
-              
-              if (unpublishedPosts.length === 0) {
-                console.log('All ready posts are already published');
-                return;
-              }
-              
-              // Remove scheduled labels from posts that are being published
-              console.log('Removing scheduled labels from posts being published...');
-              for (const post of unpublishedPosts) {
                 await utils.removeScheduledLabel(post.number);
               }
               
-              const titles = unpublishedPosts.map(p => p.title).join('", "');
-              console.log(`📝 Triggering build for ${unpublishedPosts.length} unpublished posts: "${titles}"`);
+              const titles = readyPosts.map(p => p.title).join('", "');
+              console.log(`📝 Triggering build for ${readyPosts.length} scheduled posts: "${titles}"`);
               
               // Trigger build
               await utils.triggerBuild(`scheduled publish`);
