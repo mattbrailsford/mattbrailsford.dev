@@ -1,23 +1,17 @@
 # .github/workflows/scheduled-publishing.yml
 name: Scheduled Publishing
 
-# Configuration - customize these values for your setup
 env:
-  BLOG_CATEGORY: "Blog Post"                           # GitHub Discussions category name for blog posts
-  IGNORE_LABELS: "state/draft"                         # Comma-separated labels to ignore (posts with these won't be published)
-  SCHEDULED_LABEL: "state/scheduled"                   # Label name that marks posts as scheduled for future
-  TIMEZONE_LOCATION: "Europe/London"                   # IANA timezone (auto-handles GMT/BST)
+  BLOG_CATEGORY: "Blog Post"
+  IGNORE_LABELS: "state/draft"
+  SCHEDULED_LABEL: "state/scheduled"
+  TIMEZONE_LOCATION: "Europe/London"
 
 on:
-  # Check for scheduled posts every 15 minutes
   schedule:
     - cron: '*/15 * * * *'
-  
-  # Immediate check when discussions change
   discussion:
     types: [created, edited, labeled, unlabeled]
-  
-  # Allow manual triggering
   workflow_dispatch:
 
 jobs:
@@ -26,7 +20,6 @@ jobs:
     steps:
       - name: Check for posts ready to publish
         uses: actions/github-script@v7
-        # Skip scheduled label changes AND any ignore label changes
         if: |
           github.event_name != 'discussion' ||
           github.event.action == 'created' ||
@@ -38,23 +31,63 @@ jobs:
         env:
           NETLIFY_HOOK_URL: ${{ secrets.NETLIFY_BUILD_HOOK }}
         with:
-          github-token: ${{ secrets.GH_PAT_TOKEN }}  # ← Use PAT instead
+          github-token: ${{ secrets.GH_PAT_TOKEN }}
           script: |
-
-            // Configuration from environment variables
             const CONFIG = {
               blogCategory: process.env.BLOG_CATEGORY,
-              ignoreLabels: (process.env.IGNORE_LABELS || '').split(',').map(label => label.trim()).filter(Boolean),
+              ignoreLabels: (process.env.IGNORE_LABELS || '').split(',').map(s => s.trim()).filter(Boolean),
               scheduledLabel: process.env.SCHEDULED_LABEL,
-              timezoneLocation: process.env.TIMEZONE_LOCATION || 'UTC',
-              defaultTimezone: process.env.DEFAULT_TIMEZONE  // Fallback for manual offset
+              timezoneLocation: process.env.TIMEZONE_LOCATION || 'UTC'
             };
-            
-            // ===== UTILITY FUNCTIONS =====
-            const utils = {
 
-              async triggerBuild(reason = '') 
-              {
+            const utils = 
+            {
+              // --- Timezone helpers ---
+              tzOffsetForInstant(timeZone, dateUtc) {
+                const dtf = new Intl.DateTimeFormat('en-US', {
+                  timeZone,
+                  hour12: false,
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit'
+                });
+                const parts = Object.fromEntries(dtf.formatToParts(dateUtc).map(p => [p.type, p.value]));
+                const asUTC = Date.UTC(
+                  Number(parts.year),
+                  Number(parts.month) - 1,
+                  Number(parts.day),
+                  Number(parts.hour),
+                  Number(parts.minute),
+                  Number(parts.second)
+                );
+                return Math.round((asUTC - dateUtc.getTime()) / 60000);
+              },
+
+              resolveLocalToUTC(dateStr, timeZone) {
+                const m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+                if (!m) return null;
+                const [ , Y, Mo, D, h='00', mi='00', s='00' ] = m;
+                let candidate = Date.UTC(+Y, +Mo - 1, +D, +h, +mi, +s);
+                for (let i = 0; i < 2; i++) {
+                  const offsetMin = this.tzOffsetForInstant(timeZone, new Date(candidate));
+                  candidate = Date.UTC(+Y, +Mo - 1, +D, +h, +mi, +s) - offsetMin * 60000;
+                }
+                return new Date(candidate);
+              },
+
+              fmtOffset(totalMinutes) {
+                const sign = totalMinutes >= 0 ? '+' : '-';
+                const abs = Math.abs(totalMinutes);
+                const hh = String(Math.floor(abs / 60)).padStart(2, '0');
+                const mm = String(abs % 60).padStart(2, '0');
+                return `${sign}${hh}:${mm}`;
+              },
+
+              // --- Build trigger ---
+              async triggerBuild(reason = '') {
                 try {
                   await fetch(process.env.NETLIFY_HOOK_URL, { method: 'POST' });
                   console.log(`✅ Build triggered${reason ? ': ' + reason : ''}`);
@@ -65,172 +98,73 @@ jobs:
                 }
               },
 
-              getCurrentTimezoneOffset() 
-              {
-                // Get current offset for the configured timezone
-                const now = new Date();
-                const utc = new Date(now.getTime() + (now.getTimezoneOffset() * 60000));
-                const localTime = new Date(utc.toLocaleString('en-US', { timeZone: CONFIG.timezoneLocation }));
-                const offset = Math.ceil(localTime.getTime() - utc.getTime()) / (1000 * 60); // offset in minutes
-                
-                // Convert to timezone string format (+HH:MM or -HH:MM)
-                const hours = Math.floor(Math.abs(offset) / 60);
-                const minutes = Math.abs(offset) % 60;
-                const sign = offset >= 0 ? '+' : '-';
-                
-                return `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-              },
-
-              parseDateTime(dateStr) 
-              {
+              // --- Date parsing ---
+              parseDateTime(dateStr) {
                 console.log(`Parsing date string: "${dateStr}"`);
-                
-                try 
-                {
-                  // Check if it already has timezone info
-                  if (dateStr.includes('Z') || dateStr.match(/[+-]\d{2}:\d{2}$/)) {
-                    console.log('Date has explicit timezone info');
-                    const publishDate = new Date(dateStr);
-                    
-                    if (isNaN(publishDate.getTime())) {
-                      console.log(`❌ Invalid date format: "${dateStr}"`);
-                      return null;
-                    }
-                    
-                    console.log(`✅ Parsed with timezone: ${publishDate.toISOString()}`);
-                    return publishDate;
-                  }
-                  
-                  // No timezone info, apply location-based timezone
-                  let timezoneOffset;
-                  
-                  if (CONFIG.timezoneLocation && CONFIG.timezoneLocation !== 'UTC') 
-                  {
-                    // Use location-based timezone (handles DST automatically)
-                    timezoneOffset = this.getCurrentTimezoneOffset();
-                    console.log(`No timezone info, applying ${CONFIG.timezoneLocation} timezone: ${timezoneOffset}`);
-                    
-                    // Check if we're in DST
-                    const testDate = new Date(dateStr + 'T12:00:00');
-                    const isDST = testDate.getTimezoneOffset() < new Date(testDate.getFullYear(), 0, 1).getTimezoneOffset();
-                    console.log(`DST status for date: ${isDST ? 'Summer Time' : 'Standard Time'}`);
-                  }
-                  else 
-                  {
-                    // Default to UTC
-                    timezoneOffset = '+00:00';
-                    console.log(`No timezone configured, defaulting to UTC`);
-                  }
-                  
-                  const dateWithTz = `${dateStr}${timezoneOffset}`;
-                  console.log(`Full date string: "${dateWithTz}"`);
-                  
-                  const publishDate = new Date(dateWithTz);
-                  
-                  if (isNaN(publishDate.getTime())) {
-                    console.log(`❌ Invalid date format: "${dateWithTz}"`);
+                if (/[zZ]$/.test(dateStr) || /[+-]\d{2}:\d{2}$/.test(dateStr)) {
+                  const d = new Date(dateStr);
+                  if (isNaN(d)) {
+                    console.log(`❌ Invalid date format (with TZ): "${dateStr}"`);
                     return null;
                   }
-                  
-                  console.log(`✅ Parsed with timezone: ${publishDate.toISOString()}`);
-                  
-                  // Show what this means in local time
-                  if (CONFIG.timezoneLocation !== 'UTC') {
-                    const localTimeStr = publishDate.toLocaleString('en-GB', { 
-                      timeZone: CONFIG.timezoneLocation,
-                      weekday: 'short',
-                      year: 'numeric',
-                      month: 'short', 
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      timeZoneName: 'short'
-                    });
-                    console.log(`Local time: ${localTimeStr}`);
+                  console.log(`✅ Parsed with explicit timezone: ${d.toISOString()}`);
+                  return d;
+                }
+                try {
+                  const resolved = this.resolveLocalToUTC(dateStr, CONFIG.timezoneLocation);
+                  if (!resolved || isNaN(resolved)) {
+                    console.log(`❌ Could not resolve local time for "${dateStr}" in ${CONFIG.timezoneLocation}`);
+                    return null;
                   }
-                  
-                  return publishDate;
-                } catch (error) {
-                  console.log(`❌ Error parsing date "${dateStr}": ${error.message}`);
+                  const offsetMin = this.tzOffsetForInstant(CONFIG.timezoneLocation, resolved);
+                  console.log(`Applied ${CONFIG.timezoneLocation} offset ${this.fmtOffset(offsetMin)} → ${resolved.toISOString()}`);
+                  return resolved;
+                } catch (err) {
+                  console.log(`❌ Error parsing date "${dateStr}": ${err.message}`);
                   return null;
                 }
               },
-              
-              parsePublishDate(discussion, now) 
-              {
-                const frontmatterMatch = discussion.body.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(\r?\n|$)/);
-                if (!frontmatterMatch) {
-                  return { publishDate: now, hasExplicitDate: false };
-                }
 
-                const publishedMatch = frontmatterMatch[1].match(/published:\s*(.+)/);
-                if (!publishedMatch) {
-                  return { publishDate: now, hasExplicitDate: false };
-                }
-
-                const publishedStr = publishedMatch[1].trim();
+              parsePublishDate(discussion, now) {
+                const fm = discussion.body.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(\r?\n|$)/);
+                if (!fm) return { publishDate: now, hasExplicitDate: false };
+                const publishedMatch = fm[1].match(/published:\s*(.+)/);
+                if (!publishedMatch) return { publishDate: now, hasExplicitDate: false };
+                const publishedStr = publishedMatch[1].trim().replace(/^['"]|['"]$/g, '');
                 console.log(`Found published field: "${publishedStr}"`);
-                
-                const parsedDate = this.parseDateTime(publishedStr);
-                if (!parsedDate) {
+                const parsed = this.parseDateTime(publishedStr);
+                if (!parsed) {
                   console.log('Failed to parse date, defaulting to now');
                   return { publishDate: now, hasExplicitDate: false };
                 }
-                
-                return { 
-                  publishDate: parsedDate, 
-                  hasExplicitDate: true 
-                };
+                return { publishDate: parsed, hasExplicitDate: true };
               },
-              
-              isValidBlogPost(discussion) 
-              {
-                // Check category
+
+              // --- Validation ---
+              isValidBlogPost(discussion) {
                 if (discussion.category?.name !== CONFIG.blogCategory) {
                   return { valid: false, reason: `Not a ${CONFIG.blogCategory} post` };
                 }
-                
-                // Check for any ignore labels
-                const postLabels = discussion.labels?.map(label => label.name) || [];
-                const hasIgnoreLabel = CONFIG.ignoreLabels.some(ignoreLabel => 
-                  postLabels.includes(ignoreLabel)
-                );
-                
-                if (hasIgnoreLabel) {
-                  const matchedLabels = CONFIG.ignoreLabels.filter(ignoreLabel => 
-                    postLabels.includes(ignoreLabel)
-                  );
-                  return { valid: false, reason: `Post has ignore label(s): ${matchedLabels.join(', ')}` };
+                const postLabels = discussion.labels?.map(l => l.name) || [];
+                const hasIgnore = CONFIG.ignoreLabels.some(il => postLabels.includes(il));
+                if (hasIgnore) {
+                  const matched = CONFIG.ignoreLabels.filter(il => postLabels.includes(il));
+                  return { valid: false, reason: `Post has ignore label(s): ${matched.join(', ')}` };
                 }
-                
                 return { valid: true };
               },
-              
-              async addScheduledLabel(discussionNumber)
-              {
+
+              // --- Label Handling ---
+              async addScheduledLabel(discussionNumber) {
                 try {
-                  // For discussions, we need to use the GraphQL API, not REST
-                  const mutation = `
-                    mutation($discussionId: ID!, $labelIds: [ID!]!) {
-                      addLabelsToLabelable(input: {
-                        labelableId: $discussionId,
-                        labelIds: $labelIds
-                      }) {
-                        clientMutationId
-                      }
-                    }
-                  `;
-                  
-                  // First, get the label ID for the scheduled label
                   const labelsQuery = await github.rest.issues.listLabelsForRepo({
                     owner: context.repo.owner,
                     repo: context.repo.repo
                   });
-                  
-                  let scheduledLabelObj = labelsQuery.data.find(label => label.name === CONFIG.scheduledLabel);
-                  
+
+                  let scheduledLabelObj = labelsQuery.data.find(l => l.name === CONFIG.scheduledLabel);
                   if (!scheduledLabelObj) {
-                    console.log(`Creating ${CONFIG.scheduledLabel} label...`);
+                    console.log(`Creating ${CONFIG.sCHEDULED_LABEL} label...`);
                     const newLabel = await github.rest.issues.createLabel({
                       owner: context.repo.owner,
                       repo: context.repo.repo,
@@ -240,122 +174,87 @@ jobs:
                     });
                     scheduledLabelObj = newLabel.data;
                   }
-                  
-                  // Get discussion node ID (different from number)
-                  const discussionQuery = `
+
+                  const discussionResult = await github.graphql(`
                     query($owner: String!, $repo: String!, $number: Int!) {
                       repository(owner: $owner, name: $repo) {
-                        discussion(number: $number) {
-                          id
-                        }
+                        discussion(number: $number) { id }
                       }
-                    }
-                  `;
-                  
-                  const discussionResult = await github.graphql(discussionQuery, {
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    number: discussionNumber
-                  });
-                  
+                    }`,
+                    { owner: context.repo.owner, repo: context.repo.repo, number: discussionNumber }
+                  );
+
                   const discussionId = discussionResult.repository.discussion.id;
-                  
-                  // Add the label using GraphQL
-                  await github.graphql(mutation, {
-                    discussionId: discussionId,
-                    labelIds: [scheduledLabelObj.node_id]
-                  });
-                  
+
+                  await github.graphql(`
+                    mutation($discussionId: ID!, $labelIds: [ID!]!) {
+                      addLabelsToLabelable(input: { labelableId: $discussionId, labelIds: $labelIds }) { clientMutationId }
+                    }`,
+                    { discussionId, labelIds: [scheduledLabelObj.node_id] }
+                  );
+
                   console.log(`✅ Added ${CONFIG.scheduledLabel} label to discussion #${discussionNumber}`);
                 } catch (error) {
                   console.warn(`Failed to add scheduled label: ${error.message}`);
                 }
               },
-              
-              async removeScheduledLabel(discussionNumber) 
-              {
+
+              async removeScheduledLabel(discussionNumber) {
                 try {
-                  // For discussions, we need to use the GraphQL API
-                  const mutation = `
-                    mutation($discussionId: ID!, $labelIds: [ID!]!) {
-                      removeLabelsFromLabelable(input: {
-                        labelableId: $discussionId,
-                        labelIds: $labelIds
-                      }) {
-                        clientMutationId
-                      }
-                    }
-                  `;
-                  
-                  // Get the label ID
                   const labelsQuery = await github.rest.issues.listLabelsForRepo({
                     owner: context.repo.owner,
                     repo: context.repo.repo
                   });
-                  
-                  const scheduledLabelObj = labelsQuery.data.find(label => label.name === CONFIG.scheduledLabel);
-                  
+                  const scheduledLabelObj = labelsQuery.data.find(l => l.name === CONFIG.scheduledLabel);
                   if (!scheduledLabelObj) {
                     console.log(`${CONFIG.scheduledLabel} label doesn't exist, nothing to remove`);
                     return;
                   }
-                  
-                  // Get discussion node ID
-                  const discussionQuery = `
+
+                  const discussionResult = await github.graphql(`
                     query($owner: String!, $repo: String!, $number: Int!) {
                       repository(owner: $owner, name: $repo) {
-                        discussion(number: $number) {
-                          id
-                        }
+                        discussion(number: $number) { id }
                       }
-                    }
-                  `;
-                  
-                  const discussionResult = await github.graphql(discussionQuery, {
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    number: discussionNumber
-                  });
-                  
+                    }`,
+                    { owner: context.repo.owner, repo: context.repo.repo, number: discussionNumber }
+                  );
+
                   const discussionId = discussionResult.repository.discussion.id;
-                  
-                  // Remove the label using GraphQL
-                  await github.graphql(mutation, {
-                    discussionId: discussionId,
-                    labelIds: [scheduledLabelObj.node_id]
-                  });
-                  
+
+                  await github.graphql(`
+                    mutation($discussionId: ID!, $labelIds: [ID!]!) {
+                      removeLabelsFromLabelable(input: { labelableId: $discussionId, labelIds: $labelIds }) { clientMutationId }
+                    }`,
+                    { discussionId, labelIds: [scheduledLabelObj.node_id] }
+                  );
+
                   console.log(`✅ Removed ${CONFIG.scheduledLabel} label from discussion #${discussionNumber}`);
                 } catch (error) {
                   console.log(`Could not remove scheduled label: ${error.message} (may not exist)`);
                 }
               }
             };
-            
-            // ===== MAIN LOGIC =====
-            
+
+            // ===== MAIN =====
             const eventType = context.eventName;
             const now = new Date();
-            
             console.log(`🚀 Running ${eventType} workflow at ${now.toISOString()}`);
-            
-            // If this is a discussion event, check if we should handle it
-            if (eventType === 'discussion') 
-            {
+
+            if (eventType === 'discussion') {
               const discussion = context.payload.discussion;
               console.log(`Discussion event: #${discussion.number} - "${discussion.title}"`);
 
-              // Handle label events - process ignore label changes
               if (context.payload.action === 'labeled' || context.payload.action === 'unlabeled') {
                 const changedLabel = context.payload.label?.name;
                 if (CONFIG.ignoreLabels.includes(changedLabel)) {
                   if (context.payload.action === 'labeled') {
-                    console.log(`📋 Ignore label "${changedLabel}" added to "${discussion.title}" - post will be ignored`);
+                    console.log(`📋 Ignore label "${changedLabel}" added — post will be ignored`);
                     await utils.removeScheduledLabel(discussion.number);
                     return;
                   } else {
-                    console.log(`📝 Ignore label "${changedLabel}" removed from "${discussion.title}" - checking if ready to publish`);
-                    // Continue with normal processing
+                    console.log(`📝 Ignore label "${changedLabel}" removed — rechecking`);
+                    // fall through
                   }
                 } else {
                   console.log(`Label change (${changedLabel}) not relevant to publishing, skipping`);
@@ -363,119 +262,79 @@ jobs:
                 }
               }
 
-              // Validate this is a publishable blog post
               const validation = utils.isValidBlogPost(discussion);
               if (!validation.valid) {
                 console.log(validation.reason + ', skipping');
                 return;
               }
-              
-              // Parse publish date
+
               const { publishDate, hasExplicitDate } = utils.parsePublishDate(discussion, now);
               console.log(`Published date: ${publishDate.toISOString()}${!hasExplicitDate ? ' (defaulted to now)' : ''}`);
-              
-              // If not ready yet, add scheduled label and skip
+
               if (publishDate > now) {
-                const timeUntil = Math.round((publishDate - now) / (1000 * 60));
+                const timeUntil = Math.round((publishDate - now) / 60000);
                 console.log(`Post scheduled for future (${timeUntil} minutes from now), will be published by scheduled check`);
                 await utils.addScheduledLabel(discussion.number);
                 return;
               }
-              
-              // If we get here, post should be published now
-              // Remove scheduled label if it exists
+
               await utils.removeScheduledLabel(discussion.number);
-              
-              // Trigger immediate build - no RSS check needed
-              // (if discussion was edited, we want fresh build regardless)
               console.log(`📝 Triggering immediate build for "${discussion.title}"`);
-              await utils.triggerBuild(`immediate publish`);
+              await utils.triggerBuild('immediate publish');
               return;
             }
-            else
-            {
-              // Scheduled or manual run - check only scheduled discussions
-              console.log('🔍 Checking discussions with scheduled label...');
-              
-              const query = `
-                query {
-                  search(query: "repo:${{ github.repository }} category:\\"${CONFIG.blogCategory}\\" label:${CONFIG.scheduledLabel}", type: DISCUSSION, first: 100) {
-                    edges {
-                      node {
-                        ... on Discussion {
-                          id
-                          number
-                          title
-                          body
-                          createdAt
-                        }
-                      }
-                    }
-                  }
+
+            // Scheduled/manual run: scan scheduled posts
+            console.log('🔍 Checking discussions with scheduled label...');
+            const result = await github.graphql(`
+              query($repo: String!, $owner: String!, $category: String!, $label: String!) {
+                search(query: "repo:$owner/$repo category:\\"$category\\" label:$label", type: DISCUSSION, first: 100) {
+                  edges { node { ... on Discussion { id number title body createdAt } } }
                 }
-              `;
-              
-              const result = await github.graphql(query);
-              
-              if (!result.search.edges.length) {
-                console.log(`No posts with ${CONFIG.scheduledLabel} label found`);
-                return;
-              }
-              
-              const readyPosts = [];
-              const stillScheduledPosts = [];
-              
-              // Check which scheduled posts are now ready
-              for (const edge of result.search.edges) {
-                const discussion = edge.node;
-                const { publishDate } = utils.parsePublishDate(discussion, now);
-                
-                if (publishDate <= now) {
-                  readyPosts.push({
-                    id: discussion.id,
-                    title: discussion.title,
-                    number: discussion.number,
-                    publishedDate: publishDate
-                  });
-                } else {
-                  stillScheduledPosts.push({
-                    title: discussion.title,
-                    number: discussion.number,
-                    publishedDate: publishDate
-                  });
-                }
-              }
-              
-              // Log still-scheduled posts for visibility
-              if (stillScheduledPosts.length > 0) {
-                console.log(`📅 ${stillScheduledPosts.length} posts still scheduled for future:`);
-                stillScheduledPosts
-                  .sort((a, b) => a.publishedDate - b.publishedDate)
-                  .forEach(post => {
-                    const timeUntil = Math.round((post.publishedDate - now) / (1000 * 60));
-                    console.log(`- "${post.title}" in ${timeUntil} minutes (${post.publishedDate.toISOString()})`);
-                  });
-              }
-              
-              if (readyPosts.length === 0) {
-                console.log('No posts ready to publish now');
-                return;
-              }
-              
-              console.log(`Found ${readyPosts.length} posts that should be published:`);
-              readyPosts.forEach(post => {
-                console.log(`- "${post.title}" (Discussion #${post.number})`);
-              });
-              
-              // For scheduled posts, trust the label and publish immediately
-              console.log('Removing scheduled labels and triggering build...');
-              for (const post of readyPosts) {
-                await utils.removeScheduledLabel(post.number);
-              }
-              
-              const titles = readyPosts.map(p => p.title).join('", "');
-              console.log(`📝 Triggering build for ${readyPosts.length} scheduled posts: "${titles}"`);
-              
-              // Trigger build
-              await utils.triggerBuild(`scheduled publish`);
+              }`,
+              { repo: context.repo.repo, owner: context.repo.owner, category: CONFIG.blogCategory, label: CONFIG.scheduledLabel }
+            );
+
+            if (!result.search.edges.length) {
+              console.log(`No posts with ${CONFIG.scheduledLabel} label found`);
+              return;
             }
+
+            const now2 = new Date();
+            const ready = [];
+            const future = [];
+
+            for (const edge of result.search.edges) {
+              const d = edge.node;
+              const { publishDate } = utils.parsePublishDate(d, now2);
+              if (publishDate <= now2) {
+                ready.push({ id: d.id, title: d.title, number: d.number, publishedDate: publishDate });
+              } else {
+                future.push({ title: d.title, number: d.number, publishedDate: publishDate });
+              }
+            }
+
+            if (future.length) {
+              console.log(`📅 ${future.length} posts still scheduled for future:`);
+              future.sort((a,b) => a.publishedDate - b.publishedDate).forEach(p => {
+                const mins = Math.round((p.publishedDate - now2) / 60000);
+                console.log(`- "${p.title}" in ${mins} minutes (${p.publishedDate.toISOString()})`);
+              });
+            }
+
+            if (!ready.length) {
+              console.log('No posts ready to publish now');
+              return;
+            }
+
+            console.log(`Found ${ready.length} posts ready to publish:`);
+            ready.forEach(p => console.log(`- "${p.title}" (Discussion #${p.number})`));
+
+            console.log('Removing scheduled labels and triggering build...');
+            for (const p of ready) {
+              await utils.removeScheduledLabel(p.number);
+            }
+
+            const titles = ready.map(p => p.title).join('", "');
+            console.log(`📝 Triggering build for ${ready.length} scheduled posts: "${titles}"`);
+            await utils.triggerBuild('scheduled publish');
