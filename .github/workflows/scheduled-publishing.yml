@@ -93,42 +93,20 @@ jobs:
               
               parsePublishDate(discussion, now) 
               {
-                console.log('=== PARSING PUBLISH DATE ===');
-                console.log(`Discussion body preview: ${discussion.body.substring(0, 200)}...`);
-
                 const frontmatterMatch = discussion.body.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(\r?\n|$)/);
                 if (!frontmatterMatch) {
-                  console.log('❌ No frontmatter block found (no --- delimiters)');
                   return { publishDate: now, hasExplicitDate: false };
                 }
-                
-                console.log('✅ Frontmatter block found');
-                console.log(`Raw frontmatter: ${frontmatterMatch[1]}`);
 
                 const publishedMatch = frontmatterMatch[1].match(/published:\s*(.+)/);
                 if (!publishedMatch) {
-                  console.log('❌ No "published:" field found in frontmatter');
-                  console.log('Available frontmatter lines:');
-                  frontmatterMatch[1].split('\n').forEach((line, i) => {
-                    console.log(`  ${i + 1}: "${line}"`);
-                  });
                   return { publishDate: now, hasExplicitDate: false };
                 }
-
-                const publishedStr = publishedMatch[1].trim();
-                console.log(`✅ Found published field (alt): "${publishedStr}"`);
                 
                 const publishDate = new Date(publishedStr);
-                  
-                // Check if date parsing was successful
                 if (isNaN(publishDate.getTime())) {
-                  console.log(`❌ Invalid date format: "${publishedStr}", defaulting to now`);
                   return { publishDate: now, hasExplicitDate: false };
                 }
-                
-                console.log(`✅ Successfully parsed: ${publishDate.toISOString()}`);
-                console.log(`Current time: ${now.toISOString()}`);
-                console.log(`Is future: ${publishDate > now}`);
                 
                 return { 
                   publishDate: publishDate, 
@@ -151,15 +129,66 @@ jobs:
                 return { valid: true };
               },
               
-              async addScheduledLabel(discussionNumber) 
+              async addScheduledLabel(discussionNumber)
               {
                 try {
-                  await github.rest.issues.addLabelsToIssue({
+                  // For discussions, we need to use the GraphQL API, not REST
+                  const mutation = `
+                    mutation($discussionId: ID!, $labelIds: [ID!]!) {
+                      addLabelsToLabelable(input: {
+                        labelableId: $discussionId,
+                        labelIds: $labelIds
+                      }) {
+                        clientMutationId
+                      }
+                    }
+                  `;
+                  
+                  // First, get the label ID for the scheduled label
+                  const labelsQuery = await github.rest.issues.listLabelsForRepo({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo
+                  });
+                  
+                  const scheduledLabelObj = labelsQuery.data.find(label => label.name === CONFIG.scheduledLabel);
+                  
+                  if (!scheduledLabelObj) {
+                    console.log(`Creating ${CONFIG.scheduledLabel} label...`);
+                    const newLabel = await github.rest.issues.createLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: CONFIG.scheduledLabel,
+                      color: 'D4C5F9',
+                      description: 'Post scheduled for future publication'
+                    });
+                    scheduledLabelObj = newLabel.data;
+                  }
+                  
+                  // Get discussion node ID (different from number)
+                  const discussionQuery = `
+                    query($owner: String!, $repo: String!, $number: Int!) {
+                      repository(owner: $owner, name: $repo) {
+                        discussion(number: $number) {
+                          id
+                        }
+                      }
+                    }
+                  `;
+                  
+                  const discussionResult = await github.graphql(discussionQuery, {
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    issue_number: discussionNumber,
-                    labels: [CONFIG.scheduledLabel]
+                    number: discussionNumber
                   });
+                  
+                  const discussionId = discussionResult.repository.discussion.id;
+                  
+                  // Add the label using GraphQL
+                  await github.graphql(mutation, {
+                    discussionId: discussionId,
+                    labelIds: [scheduledLabelObj.node_id]
+                  });
+                  
                   console.log(`Added ${CONFIG.scheduledLabel} label to discussion #${discussionNumber}`);
                 } catch (error) {
                   console.warn(`Failed to add scheduled label: ${error.message}`);
@@ -169,16 +198,59 @@ jobs:
               async removeScheduledLabel(discussionNumber) 
               {
                 try {
-                  await github.rest.issues.removeLabel({
+                  // For discussions, we need to use the GraphQL API
+                  const mutation = `
+                    mutation($discussionId: ID!, $labelIds: [ID!]!) {
+                      removeLabelsFromLabelable(input: {
+                        labelableId: $discussionId,
+                        labelIds: $labelIds
+                      }) {
+                        clientMutationId
+                      }
+                    }
+                  `;
+                  
+                  // Get the label ID
+                  const labelsQuery = await github.rest.issues.listLabelsForRepo({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo
+                  });
+                  
+                  const scheduledLabelObj = labelsQuery.data.find(label => label.name === CONFIG.scheduledLabel);
+                  
+                  if (!scheduledLabelObj) {
+                    console.log(`${CONFIG.scheduledLabel} label doesn't exist, nothing to remove`);
+                    return;
+                  }
+                  
+                  // Get discussion node ID
+                  const discussionQuery = `
+                    query($owner: String!, $repo: String!, $number: Int!) {
+                      repository(owner: $owner, name: $repo) {
+                        discussion(number: $number) {
+                          id
+                        }
+                      }
+                    }
+                  `;
+                  
+                  const discussionResult = await github.graphql(discussionQuery, {
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    issue_number: discussionNumber,
-                    name: CONFIG.scheduledLabel
+                    number: discussionNumber
                   });
+                  
+                  const discussionId = discussionResult.repository.discussion.id;
+                  
+                  // Remove the label using GraphQL
+                  await github.graphql(mutation, {
+                    discussionId: discussionId,
+                    labelIds: [scheduledLabelObj.node_id]
+                  });
+                  
                   console.log(`Removed ${CONFIG.scheduledLabel} label from discussion #${discussionNumber}`);
                 } catch (error) {
-                  // Label might not exist, that's fine
-                  console.log(`Scheduled label not found on discussion #${discussionNumber} (already removed)`);
+                  console.log(`Could not remove scheduled label: ${error.message} (may not exist)`);
                 }
               }
             };
