@@ -71,7 +71,7 @@ jobs:
                 const now = new Date();
                 const utc = new Date(now.getTime() + (now.getTimezoneOffset() * 60000));
                 const localTime = new Date(utc.toLocaleString('en-US', { timeZone: CONFIG.timezoneLocation }));
-                const offset = (localTime.getTime() - utc.getTime()) / (1000 * 60); // offset in minutes
+                const offset = Math.ceil(localTime.getTime() - utc.getTime()) / (1000 * 60); // offset in minutes
                 
                 // Convert to timezone string format (+HH:MM or -HH:MM)
                 const hours = Math.floor(Math.abs(offset) / 60);
