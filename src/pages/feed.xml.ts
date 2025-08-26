@@ -17,9 +17,14 @@ export async function GET(context:APIContext) {
             description: post.description ?? "",
             pubDate: post.published,
             link: `/${post.slug}`,
+            customData: `
+                <github:discussionId>${post.githubDiscussionId}</github:discussionId>
+                <github:discussionNumber>${post.githubDiscussionNumber}</github:discussionNumber>
+            `.trim()
         })),
         xmlns: {
             atom: 'http://www.w3.org/2005/Atom',
+            github: 'https://github.com/discussions'
         },
         customData: `<atom:link href="${rssUrl}" rel="self" type="application/rss+xml" />`
     })
