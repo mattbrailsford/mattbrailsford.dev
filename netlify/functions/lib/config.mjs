@@ -7,11 +7,10 @@ export const CONFIG = {
 };
 
 export const GH = {
-  owner: process.env.GH_OWNER,
-  repo: process.env.GH_REPO,
-  token: process.env.GH_TOKEN,
-  workflow: process.env.GH_WORKFLOW,
-  ref: process.env.GH_REF || "main",
+  owner: process.env.GITHUB_REPO_OWNER,
+  repo: process.env.GITHUB_REPO_NAME,
+  token: process.env.GITHUB_ACCESS_TOKEN,
+  webhookSecret: process.env.GITHUB_WEBHOOK_SECRET
 };
 
 export const BUILD = {
