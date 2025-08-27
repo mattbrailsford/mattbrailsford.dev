@@ -24,46 +24,66 @@ async function ghGraphQL(query, variables)
   return json.data;
 }
 
+async function getLabelNodeId(labelName) {
+  const data = await ghGraphQL(
+    `query($owner:String!, $repo:String!, $q:String!) {
+       repository(owner:$owner, name:$repo) {
+         labels(query:$q, first: 1) {
+           nodes { id name }
+         }
+       }
+     }`,
+    { owner: GH.owner, repo: GH.repo, q: labelName }
+  );
+  return data?.repository?.labels?.nodes?.[0].id;
+}
+
+async function discussionHasLabel(discussionId, labelName) {
+  const data = await ghGraphQL(
+    `query($id:ID!, $q:String!) {
+       node(id:$id) {
+         ... on Discussion {
+           labels(query:$q, first: 1) {
+             nodes { id name }
+           }
+         }
+       }
+     }`,
+    { id: discussionId, q: labelName }
+  );
+  return (data?.node?.labels?.nodes?.length ?? 0) > 0;
+}
+
 export async function addScheduledLabel(discussionId) 
 {
-  try
-  {
-    const labelsRes = await fetch(
-      `https://api.github.com/repos/${GH.owner}/${GH.repo}/labels?per_page=100`,
-      { headers: ghHeaders() }
-    );
-    const labels = await labelsRes.json();
-    let scheduled = labels.find(l => l.name === CONFIG.scheduledLabel);
-    if (!scheduled) return;
-    await ghGraphQL(
-      `mutation($id:ID!, $labelIds:[ID!]!) {
-        addLabelsToLabelable(input:{labelableId:$id, labelIds:$labelIds}) { clientMutationId }
-      }`,
-      { id: discussionId, labelIds: [scheduled.node_id] }
-    );
-  }
-  catch (err) { console.log(`Failed to add scheduled label: ${err.message}`); };
+  const hasLabel = await discussionHasLabel(discussionId, CONFIG.scheduledLabel);
+  if (hasLabel) return;
+
+  const labelNodeId = await getLabelNodeId(CONFIG.scheduledLabel);
+  if (!labelNodeId) return;
+
+  await ghGraphQL(
+    `mutation($id:ID!, $labelIds:[ID!]!) {
+      addLabelsToLabelable(input:{labelableId:$id, labelIds:$labelIds}) { clientMutationId }
+    }`,
+    { id: discussionId, labelIds: [labelNodeId] }
+  );
 }
 
 export async function removeScheduledLabel(discussionId) 
 {
-  try
-  {
-    const labelsRes = await fetch(
-      `https://api.github.com/repos/${GH.owner}/${GH.repo}/labels?per_page=100`,
-      { headers: ghHeaders() }
-    );
-    const labels = await labelsRes.json();
-    const scheduled = labels.find(l => l.name === CONFIG.scheduledLabel);
-    if (!scheduled) return;
-    await ghGraphQL(
-      `mutation($id:ID!, $labelIds:[ID!]!) {
-        removeLabelsFromLabelable(input:{labelableId:$id, labelIds:$labelIds}) { clientMutationId }
-      }`,
-      { id: discussionId, labelIds: [scheduled.node_id] }
-    );
-  }
-  catch (err) { console.log(`Failed to remove scheduled label: ${err.message}`); };
+  const hasLabel = await discussionHasLabel(discussionId, CONFIG.scheduledLabel);
+  if (!hasLabel) return;
+
+  const labelNodeId = await getLabelNodeId(CONFIG.scheduledLabel);
+  if (!labelNodeId) return;
+  
+  await ghGraphQL(
+    `mutation($id:ID!, $labelIds:[ID!]!) {
+      removeLabelsFromLabelable(input:{labelableId:$id, labelIds:$labelIds}) { clientMutationId }
+    }`,
+    { id: discussionId, labelIds: [labelNodeId] }
+  );
 }
 
 export function verifySignature(req, bodyText) 
