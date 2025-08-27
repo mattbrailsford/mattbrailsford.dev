@@ -20,6 +20,7 @@ export default async () => {
     {
       await removeScheduledLabel(post.id);
       await dequeuePost(post.id);
+      console.log(`Publishing post '${post.title}' [${post.id}]`);
       publishCount++;
     }
   }

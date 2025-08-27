@@ -16,6 +16,7 @@ export default async (req) => {
 
     const d = payload.discussion;
     const id = d.node_id;
+    const title = d.title;
     const now = new Date();
 
     const valid = isValidBlogPost(d);
@@ -23,10 +24,12 @@ export default async (req) => {
 
     const { publishDate } = parsePostPublishDate(d.body, now);
     if (publishDate > now) {
-      await enqueuePost({ id, publishAt: publishDate.toISOString() });
+      await enqueuePost({ id, title, publishAt: publishDate.toISOString() });
       await addScheduledLabel(id);
+      console.log(`Scheduled post '${title}' [${id}] for ${publishDate.toISOString()}`);
       return new Response("Scheduled", { status: 201 });
     } else {
+      console.log(`Publishing post '${title}' [${id}]`);
       await removeScheduledLabel(id);
       await triggerDeploy();
       return new Response("Published", { status: 200 });
