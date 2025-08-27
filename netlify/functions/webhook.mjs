@@ -31,7 +31,7 @@ export default async (req) => {
     } else {
       console.log(`Publishing post '${title}' [${id}]`);
       await removeScheduledLabel(id);
-      await triggerDeploy();
+      //await triggerDeploy();
       return new Response("Published", { status: 200 });
     }
 
