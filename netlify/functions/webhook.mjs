@@ -15,6 +15,7 @@ export default async (req) => {
     if (event !== "discussion") return new Response("Ignored", { status: 202 });
 
     const d = payload.discussion;
+    const id = d.node_id;
     const now = new Date();
 
     const valid = isValidBlogPost(d);
@@ -22,11 +23,11 @@ export default async (req) => {
 
     const { publishDate } = parsePostPublishDate(d.body, now);
     if (publishDate > now) {
-      await enqueuePost({ id: d.id, publishAt: publishDate.toISOString() });
-      await addScheduledLabel(d.id);
+      await enqueuePost({ id, publishAt: publishDate.toISOString() });
+      await addScheduledLabel(id);
       return new Response("Scheduled", { status: 201 });
     } else {
-      await removeScheduledLabel(d.id);
+      await removeScheduledLabel(id);
       await triggerDeploy();
       return new Response("Published", { status: 200 });
     }
