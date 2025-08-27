@@ -41,7 +41,7 @@ async function getLabelNodeId(labelName) {
 async function discussionHasLabel(discussionId, labelIdOrName) 
 {
   const data = await ghGraphQL(
-    `query($id:ID!, $first:Int!, $after:String) {
+    `query($id:ID!, $first:Int!) {
         node(id:$id) {
           ... on Discussion {
             labels(first:$first) {
