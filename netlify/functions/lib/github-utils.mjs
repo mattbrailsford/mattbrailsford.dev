@@ -42,7 +42,7 @@ export async function addScheduledLabel(discussionId)
       { id: discussionId, labelIds: [scheduled.node_id] }
     );
   }
-  catch {};
+  catch (err) { console.log(`Failed to add scheduled label: ${err.message}`); };
 }
 
 export async function removeScheduledLabel(discussionId) 
@@ -63,7 +63,7 @@ export async function removeScheduledLabel(discussionId)
       { id: discussionId, labelIds: [scheduled.node_id] }
     );
   }
-  catch {};
+  catch (err) { console.log(`Failed to remove scheduled label: ${err.message}`); };
 }
 
 export function verifySignature(req, bodyText) 
