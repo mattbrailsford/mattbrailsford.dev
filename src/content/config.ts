@@ -11,7 +11,6 @@ const blogPosts = defineCollection({
         incremental: false,
         mappings: {
             ...DEFAULT_MAPPINGS,
-            draftLabel: undefined,
             ignoreLabels: ["state/draft", "state/scheduled"],
         }
     }),
