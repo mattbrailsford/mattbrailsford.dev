@@ -44,14 +44,14 @@ async function discussionHasLabel(discussionId, labelIdOrName)
     `query($id:ID!, $first:Int!, $after:String) {
         node(id:$id) {
           ... on Discussion {
-            labels(first:$first, after:$after) {
+            labels(first:$first) {
               nodes { id name }
               pageInfo { hasNextPage endCursor }
             }
           }
         }
       }`,
-    { id: discussionId, first: 100, after: cursor }
+    { id: discussionId, first: 100 }
   );
   const conn = data?.node?.labels;
   if (!conn) return false;
