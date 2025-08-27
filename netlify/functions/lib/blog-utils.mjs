@@ -50,7 +50,7 @@ export async function getQueuedPosts()
   const posts = [];
   for (const { key } of blobs) 
   {
-    const post = await store.getJSON(key);
+    const post = await store.get(key, { type: 'json' });
     if (post) posts.push(post);
   }
   return posts;
