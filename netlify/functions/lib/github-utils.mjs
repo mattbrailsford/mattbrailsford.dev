@@ -38,20 +38,24 @@ async function getLabelNodeId(labelName) {
   return data?.repository?.labels?.nodes?.[0].id;
 }
 
-async function discussionHasLabel(discussionId, labelName) {
+async function discussionHasLabel(discussionId, labelIdOrName) 
+{
   const data = await ghGraphQL(
-    `query($id:ID!, $q:String!) {
-       node(id:$id) {
-         ... on Discussion {
-           labels(query:$q, first: 1) {
-             nodes { id name }
-           }
-         }
-       }
-     }`,
-    { id: discussionId, q: labelName }
+    `query($id:ID!, $first:Int!, $after:String) {
+        node(id:$id) {
+          ... on Discussion {
+            labels(first:$first, after:$after) {
+              nodes { id name }
+              pageInfo { hasNextPage endCursor }
+            }
+          }
+        }
+      }`,
+    { id: discussionId, first: 100, after: cursor }
   );
-  return (data?.node?.labels?.nodes?.length ?? 0) > 0;
+  const conn = data?.node?.labels;
+  if (!conn) return false;
+  return conn.nodes.some(l => l.name === labelIdOrName || l.id === labelIdOrName);
 }
 
 export async function addScheduledLabel(discussionId) 
