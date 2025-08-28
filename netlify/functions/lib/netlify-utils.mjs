@@ -1,6 +1,4 @@
 import { BUILD } from "./config.mjs";
 
-export async function triggerDeploy() 
-{
+export const triggerDeploy = async () => 
     await fetch(BUILD.netlifyHook, { method: "POST" });
-}

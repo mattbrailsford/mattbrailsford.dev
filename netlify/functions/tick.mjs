@@ -2,31 +2,26 @@ import { removeScheduledLabel, getScheduledDiscussions } from "./lib/github-util
 import { triggerDeploy } from "./lib/netlify-utils.mjs";
 import { parsePostPublishDate } from "./lib/blog-utils.mjs";
 
-export const config = {
-  schedule: "*/1 * * * *"  // Every minute to check scheduled posts
-};
+export const config = { schedule: "*/1 * * * *" };
 
-export default async () => {
-
+export default async () => 
+{
   const now = new Date();
-
-  let publishCount = 0;
-
   const posts = await getScheduledDiscussions();
 
-  for (const post of posts) 
-  {    
-    const { publishDate } = parsePostPublishDate(post.body, now);
-    if (publishDate <= now)
-    {
-      await removeScheduledLabel(post.id);
-      console.log(`Publishing post '${post.title}' [${post.id}]`);
-      publishCount++;
-    }
-  }
+  const publishedPosts = await Promise.all(
+    posts.map(async post => {
+      const { publishDate } = parsePostPublishDate(post.body, now);
+      if (publishDate <= now) {
+        await removeScheduledLabel(post.id);
+        console.log(`Publishing post '${post.title}' [${post.id}]`);
+        return post;
+      }
+    })
+  );
 
+  const publishCount = publishedPosts.filter(Boolean).length;
   if (publishCount > 0) await triggerDeploy();
 
   return new Response(`Published ${publishCount} posts`, { status: 200 });
-
 };

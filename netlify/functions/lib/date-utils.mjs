@@ -1,6 +1,6 @@
 import { CONFIG } from "./config.mjs";
 
-export function tzOffsetForInstant(timeZone, dateUtc) 
+const tzOffsetForInstant = (timeZone, dateUtc) =>
 {
   const dtf = new Intl.DateTimeFormat("en-US", {
     timeZone, hour12: false,
@@ -12,7 +12,7 @@ export function tzOffsetForInstant(timeZone, dateUtc)
   return Math.round((asUTC - dateUtc.getTime()) / 60000);
 }
 
-export function resolveLocalToUTC(dateStr, timeZone) 
+const resolveLocalToUTC = (dateStr, timeZone) =>
 {
   const m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
   if (!m) return null;
@@ -25,7 +25,7 @@ export function resolveLocalToUTC(dateStr, timeZone)
   return new Date(candidate);
 }
 
-export function parseDateTime(dateStr) 
+export const parseDateTime = (dateStr) =>
 {
   if (!dateStr) return null;
   if (/[zZ]$/.test(dateStr) || /[+-]\d{2}:\d{2}$/.test(dateStr)) {
