@@ -1,7 +1,8 @@
 export const CONFIG = {
+  domain: process.env.DOMAIN || "localhost",
+  rssPath: process.env.RSS_PATH || "/feed.xml",
   blogCategory: process.env.BLOG_CATEGORY || "Blog Post",
-  ignoreLabels: (process.env.IGNORE_LABELS || "")
-    .split(",").map(s => s.trim()).filter(Boolean),
+  ignoreLabels: (process.env.IGNORE_LABELS || "").split(",").map(s => s.trim()).filter(Boolean),
   scheduledLabel: process.env.SCHEDULED_LABEL || "state/scheduled",
   timezoneLocation: process.env.TIMEZONE_LOCATION || "UTC",
 };

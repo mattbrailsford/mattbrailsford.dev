@@ -1,16 +1,6 @@
 import crypto from "node:crypto";
 import { CONFIG, GH } from "./config.mjs";
 
-function ghHeaders() 
-{
-  return {
-    "Authorization": `Bearer ${GH.token}`,
-    "Accept": "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
-    "Content-Type": "application/json"
-  };
-}
-
 async function ghGraphQL(query, variables) 
 {
   const res = await fetch("https://api.github.com/graphql", {
@@ -24,18 +14,23 @@ async function ghGraphQL(query, variables)
   return json.data;
 }
 
+let _labelNodeIdPromise;
 async function getLabelNodeId(labelName) {
-  const data = await ghGraphQL(
-    `query($owner:String!, $repo:String!, $q:String!) {
-       repository(owner:$owner, name:$repo) {
-         labels(query:$q, first: 1) {
-           nodes { id name }
-         }
-       }
-     }`,
-    { owner: GH.owner, repo: GH.repo, q: labelName }
-  );
-  return data?.repository?.labels?.nodes?.[0].id;
+  if (!_labelNodeIdPromise) {
+    _labelNodeIdPromise = ghGraphQL(
+      `query($owner:String!, $repo:String!, $q:String!) {
+        repository(owner:$owner, name:$repo) {
+          labels(query:$q, first: 1) {
+            nodes { id name }
+          }
+        }
+      }`,
+      { owner: GH.owner, repo: GH.repo, q: labelName }
+    ).then(data => {
+      return data?.repository?.labels?.nodes?.[0].id;
+    });
+  }
+  return _labelNodeIdPromise;
 }
 
 async function discussionHasLabel(discussionId, labelIdOrName) 
@@ -88,6 +83,29 @@ export async function removeScheduledLabel(discussionId)
     }`,
     { id: discussionId, labelIds: [labelNodeId] }
   );
+}
+
+export async function getScheduledDiscussions() 
+{
+  const labelNodeId = await getLabelNodeId(CONFIG.scheduledLabel);
+  if (!labelNodeId) return [];
+  
+  const data = await ghGraphQL(
+    `query($owner:String!, $repo:String!, $labelId:ID!) {
+      repository(owner:$owner, name:$repo) {
+        discussions(first: 100, labels: [$labelId]) {
+          nodes {
+            id
+            title
+            body
+          }
+        }
+      }
+    }`,
+    { owner: GH.owner, repo: GH.repo, labelId: labelNodeId }
+  );
+  
+  return data?.repository?.discussions?.nodes || [];
 }
 
 export function verifySignature(req, bodyText) 

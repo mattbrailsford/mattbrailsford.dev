@@ -1,5 +1,5 @@
 import { addScheduledLabel, removeScheduledLabel, verifySignature } from "./lib/github-utils.mjs";
-import { isValidBlogPost, parsePostPublishDate, enqueuePost } from "./lib/blog-utils.mjs";
+import { isValidPost, parsePostPublishDate, isPostPublished } from "./lib/blog-utils.mjs";
 import { triggerDeploy } from "./lib/netlify-utils.mjs";
 
 export default async (req) => {
@@ -19,12 +19,19 @@ export default async (req) => {
     const title = d.title;
     const now = new Date();
 
-    const valid = isValidBlogPost(d);
-    if (!valid.valid) return new Response(valid.reason, { status: 200 });
+    const valid = isValidPost(d);
+    if (!valid.valid) {
+      // If the post is invalid, but it's published, trigger a deploy to cause it to unpublish
+      const isPublished = await isPostPublished(id);
+      if (isPublished) await triggerDeploy();
+      return new Response(valid.reason, { status: 200 });
+    }
 
     const { publishDate } = parsePostPublishDate(d.body, now);
     if (publishDate > now) {
-      await enqueuePost({ id, title, publishAt: publishDate.toISOString() });
+      // The post should be scheduled, but if it appears to be published, then trigger a build to unpublish it
+      const isPublished = await isPostPublished(id);
+      if (isPublished) await triggerDeploy();
       await addScheduledLabel(id);
       console.log(`Scheduled post '${title}' [${id}] for ${publishDate.toISOString()}`);
       return new Response("Scheduled", { status: 201 });

@@ -1,8 +1,35 @@
 import { CONFIG } from "./config.mjs";
 import { parseDateTime } from "./date-utils.mjs";
-import { getStore } from "@netlify/blobs";
 
-export function isValidBlogPost(discussion) 
+let _blogRssPromise = null;
+
+async function getBlogRss() 
+{
+  if (!_blogRssPromise) {
+    _blogRssPromise = fetch(`https://${CONFIG.domain}${CONFIG.rssPath}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch RSS: ${response.status}`);
+        }
+        return response.text();
+      });
+  }
+  return _blogRssPromise;
+}
+
+export async function isPostPublished(discussionId)
+{
+  try {
+    const rssText = await getBlogRss();
+    const discussionIdPattern = new RegExp(`<github:discussionId>${discussionId}</github:discussionId>`, 'i');
+    return discussionIdPattern.test(rssText);
+  } catch (error) {
+    console.error('Error checking if post is published:', error);
+    return false;
+  }
+}
+
+export function isValidPost(discussion) 
 {
   if (discussion.category?.name !== CONFIG.blogCategory) {
     return { valid: false, reason: `Not a ${CONFIG.blogCategory} post` };
@@ -27,31 +54,4 @@ export function parsePostPublishDate(body, now)
   return parsed 
     ? { publishDate: parsed, hasExplicitDate: true }
     : { publishDate: now, hasExplicitDate: false };
-}
-
-export async function enqueuePost({ id, publishAt }) 
-{
-  const store = getStore("blog-scheduler");
-  const key = `post/${id}`;
-  await store.setJSON(key, { id, publishAt });
-}
-
-export async function dequeuePost(id) 
-{
-  const store = getStore("blog-scheduler");
-  const key = `post/${id}`;
-  await store.delete(key);
-}
-
-export async function getQueuedPosts() 
-{
-  const store = getStore("blog-scheduler");
-  const { blobs } = await store.list({ prefix: "post/" });
-  const posts = [];
-  for (const { key } of blobs) 
-  {
-    const post = await store.get(key, { type: 'json' });
-    if (post) posts.push(post);
-  }
-  return posts;
 }
