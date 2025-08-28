@@ -87,25 +87,30 @@ export async function removeScheduledLabel(discussionId)
 
 export async function getScheduledDiscussions() 
 {
-  const labelNodeId = await getLabelNodeId(CONFIG.scheduledLabel);
-  if (!labelNodeId) return [];
-  
   const data = await ghGraphQL(
-    `query($owner:String!, $repo:String!, $labelId:ID!) {
+    `query($owner:String!, $repo:String!) {
       repository(owner:$owner, name:$repo) {
-        discussions(first: 100, labels: [$labelId]) {
+        discussions(first: 100) {
           nodes {
             id
             title
             body
+            labels(first: 10) {
+              nodes { name }
+            }
           }
         }
       }
     }`,
-    { owner: GH.owner, repo: GH.repo, labelId: labelNodeId }
+    { owner: GH.owner, repo: GH.repo }
   );
   
-  return data?.repository?.discussions?.nodes || [];
+  const discussions = data?.repository?.discussions?.nodes || [];
+  
+  // Filter discussions that have the scheduled label
+  return discussions.filter(discussion => 
+    discussion.labels?.nodes?.some(label => label.name === CONFIG.scheduledLabel)
+  );
 }
 
 export function verifySignature(req, bodyText) 
