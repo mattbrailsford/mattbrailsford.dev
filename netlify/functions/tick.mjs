@@ -1,5 +1,6 @@
 import { removeScheduledLabel, getScheduledDiscussions } from "./lib/github-utils.mjs";
-import { triggerDeploy } from "./lib/netlify-utils.mjs"
+import { triggerDeploy } from "./lib/netlify-utils.mjs";
+import { parsePostPublishDate } from "./lib/blog-utils.mjs";
 
 export const config = {
   schedule: "*/1 * * * *"  // Every minute to check scheduled posts
