@@ -16,7 +16,7 @@ export default async () => {
 
   for (const post of posts) 
   {    
-    const { publishDate } = parsePostPublishDate(d.body, now);
+    const { publishDate } = parsePostPublishDate(post.body, now);
     if (publishDate <= now)
     {
       await removeScheduledLabel(post.id);
