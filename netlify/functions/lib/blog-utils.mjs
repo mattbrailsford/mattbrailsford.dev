@@ -22,10 +22,11 @@ export const isValidPost = (discussion) =>
 
 export const parsePostPublishDate = (body, fallback) => 
 {
-  const match = body?.match(/^---\s*\r?\n([\s\S]*?)\r?\n---.*?published:\s*(.+)/m);
-  if (!match) return { publishDate: fallback, hasExplicitDate: false };
-
-  const publishedStr = match[2].trim().replace(/^['"]|['"]$/g, "");
+  const fm = body?.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*$/m);
+  if (!fm) return { publishDate: now, hasExplicitDate: false };
+  const pdm = fm[1].match(/\bpublished:\s*([^\r\n]+)/i);
+  if (!pdm) return { publishDate: fallback, hasExplicitDate: false };
+  const publishedStr = pdm[1].trim().replace(/^['"]|['"]$/g, "");
   const parsed = parseDateTime(publishedStr);
   return parsed
     ? { publishDate: parsed, hasExplicitDate: true }
