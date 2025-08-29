@@ -17,7 +17,11 @@ const ghGraphQL = async (query, variables) =>
 let _labelId;
 const getLabelId = async () => _labelId ??= (await ghGraphQL(
   `query($owner:String!, $repo:String!, $q:String!) {
-    repository(owner:$owner, name:$repo) { labels(query:$q, first:1) { nodes { id } } }
+    repository(owner:$owner, name:$repo) {
+      labels(query:$q, first:1) { 
+        nodes { id } 
+      } 
+    }
   }`,
   { owner: GH.owner, repo: GH.repo, q: CONFIG.scheduledLabel }
 ))?.repository?.labels?.nodes?.[0]?.id;
@@ -41,6 +45,23 @@ const discussionHasLabel = async (discussionId, labelIdOrName) =>
   return conn.nodes.some(l => l.id === labelIdOrName || l.name.toLowerCase() === labelIdOrName.toLowerCase());
 }
 
+export const addScheduledLabel = async (discussionId) => 
+{
+  if (await discussionHasLabel(discussionId, CONFIG.scheduledLabel)) return;
+
+  const labelId = await getLabelId();
+  if (!labelId) return;
+
+  await ghGraphQL(
+    `mutation($id:ID!, $labelIds:[ID!]!) {
+      addLabelsToLabelable(input:{labelableId:$id, labelIds:$labelIds}) { 
+        clientMutationId
+      }
+    }`,
+    { id: discussionId, labelIds: [labelId] }
+  );
+};
+
 export const removeScheduledLabel = async (discussionId) => 
 {
   if (!(await discussionHasLabel(discussionId, CONFIG.scheduledLabel))) return;
@@ -50,7 +71,9 @@ export const removeScheduledLabel = async (discussionId) =>
 
   await ghGraphQL(
     `mutation($id:ID!, $labelIds:[ID!]!) {
-      removeLabelsFromLabelable(input:{labelableId:$id, labelIds:$labelIds}) { clientMutationId }
+      removeLabelsFromLabelable(input:{labelableId:$id, labelIds:$labelIds}) { 
+        clientMutationId 
+      }
     }`,
     { id: discussionId, labelIds: [labelId] }
   );
@@ -59,7 +82,9 @@ export const removeScheduledLabel = async (discussionId) =>
 export const getScheduledDiscussions = async () => (await ghGraphQL(
   `query($query:String!) {
     search(type:DISCUSSION, query:$query, first:100) {
-      nodes { ...on Discussion { id title body } }
+      nodes { 
+        ...on Discussion { id title body } 
+      }
     }
   }`,
   { query: `repo:${GH.owner}/${GH.repo} label:"${CONFIG.scheduledLabel}"` }
