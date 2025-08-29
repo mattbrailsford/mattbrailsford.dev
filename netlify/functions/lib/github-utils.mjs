@@ -52,7 +52,7 @@ export const addScheduledLabel = async (discussionId) =>
 
 export const removeScheduledLabel = async (discussionId) => 
 {
-  if (!(await discussionHasLabel(discussionId))) return;  // CRITICAL: Prevents webhook loop
+  if (!(await discussionHasLabel(discussionId))) return;
 
   const labelId = await getLabelId();
   if (!labelId) return;

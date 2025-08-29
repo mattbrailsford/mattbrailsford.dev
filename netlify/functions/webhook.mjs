@@ -20,7 +20,8 @@ export default async (req) =>
   const valid = isValidPost(d);
   const isPublished = await isPostPublished(id);
 
-  if (!valid.valid) {
+  if (!valid.valid) 
+  {
     if (isPublished) await triggerDeploy(); // Trigger unpublish
     return new Response(valid.reason, { status: 200 });
   }
