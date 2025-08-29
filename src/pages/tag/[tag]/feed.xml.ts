@@ -1,7 +1,7 @@
 ﻿import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
 import { getBlogPosts, getBlogTags, sortPostsByPublishedDateDesc } from '../../../utils';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../../consts';
+import { SITE_TITLE } from '../../../consts';
 
 export  const getStaticPaths = (async () => {
     const tags: string[] = await getBlogTags();
