@@ -2,7 +2,7 @@ import { removeScheduledLabel, getScheduledDiscussions } from "./lib/github-util
 import { triggerDeploy } from "./lib/netlify-utils.mjs";
 import { parsePostPublishDate } from "./lib/blog-utils.mjs";
 
-export const config = { schedule: "*/1 * * * *" };
+export const config = { schedule: "*/5 * * * *" };
 
 export default async () => 
 {
