@@ -14,8 +14,8 @@ const ghGraphQL = async (query, variables) =>
   return json.data;
 }
 
-let _labelId;
-const getLabelId = async () => _labelId ??= (await ghGraphQL(
+let _scheduledLabelId;
+const getScheduledLabelId = async () => _scheduledLabelId ??= (await ghGraphQL(
   `query($owner:String!, $repo:String!, $q:String!) {
     repository(owner:$owner, name:$repo) {
       labels(query:$q, first:1) { 
@@ -49,7 +49,7 @@ export const addScheduledLabel = async (discussionId) =>
 {
   if (await discussionHasLabel(discussionId, CONFIG.scheduledLabel)) return;
 
-  const labelId = await getLabelId();
+  const labelId = await getScheduledLabelId();
   if (!labelId) return;
 
   await ghGraphQL(
@@ -66,7 +66,7 @@ export const removeScheduledLabel = async (discussionId) =>
 {
   if (!(await discussionHasLabel(discussionId, CONFIG.scheduledLabel))) return;
 
-  const labelId = await getLabelId();
+  const labelId = await getScheduledLabelId();
   if (!labelId) return;
 
   await ghGraphQL(
