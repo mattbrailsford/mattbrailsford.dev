@@ -22,37 +22,28 @@ const getLabelId = async () => _labelId ??= (await ghGraphQL(
   { owner: GH.owner, repo: GH.repo, q: CONFIG.scheduledLabel }
 ))?.repository?.labels?.nodes?.[0]?.id;
 
-const discussionHasLabel = async (discussionId) => 
+const discussionHasLabel = async (discussionId, labelIdOrName) =>
 {
   const data = await ghGraphQL(
-    `query($query:String!) {
-      search(type: DISCUSSION, query: $query, first: 1) {
-        discussionCount
-      }
-    }`,
-    { query: `repo:${GH.owner}/${GH.repo} label:"${CONFIG.scheduledLabel}" in:id ${discussionId}` }
+    `query($id:ID!) {
+        node(id:$id) {
+          ... on Discussion {
+            labels(first:100) {
+              nodes { id name }
+            }
+          }
+        }
+      }`,
+    { id: discussionId }
   );
-  return data?.search?.discussionCount > 0;
-};
-
-export const addScheduledLabel = async (discussionId) => 
-{
-  if (await discussionHasLabel(discussionId)) return;
-
-  const labelId = await getLabelId();
-  if (!labelId) return;
-
-  await ghGraphQL(
-    `mutation($id:ID!, $labelIds:[ID!]!) {
-      addLabelsToLabelable(input:{labelableId:$id, labelIds:$labelIds}) { clientMutationId }
-    }`,
-    { id: discussionId, labelIds: [labelId] }
-  );
-};
+  const conn = data?.node?.labels;
+  if (!conn) return false;
+  return conn.nodes.some(l => l.id === labelIdOrName || l.name.toLowerCase() === labelIdOrName.toLowerCase());
+}
 
 export const removeScheduledLabel = async (discussionId) => 
 {
-  if (!(await discussionHasLabel(discussionId))) return;
+  if (!(await discussionHasLabel(discussionId, CONFIG.scheduledLabel))) return;
 
   const labelId = await getLabelId();
   if (!labelId) return;
