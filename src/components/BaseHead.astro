@@ -1,6 +1,7 @@
 ﻿---
 import '../styles/global.css';
 import fontUrl from '../fonts/hf-bigcuat-regular.woff2?url';
+import { ClientRouter } from 'astro:transitions';
 
 export interface Props {
     title: string;
@@ -52,6 +53,9 @@ const { title, description, image, schema, feed } = Astro.props;
 
 <!-- Theming --->
 <meta name="theme-color" content="#ffffff">
+
+<!-- View Transitions -->
+<ClientRouter />
 
 <!-- Webmentions -->
 <link rel="webmention" href="https://webmention.io/mattbrailsford.dev/webmention" />
