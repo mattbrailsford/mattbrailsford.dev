@@ -1,4 +1,20 @@
-﻿pre.astro-code {
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    @font-face {
+        font-family: 'HF Bigcuat';
+        src: url('../fonts/hf-bigcuat-regular.woff2') format('woff2'),
+             url('../fonts/hf-bigcuat-regular.woff') format('woff'),
+             url('../fonts/hf-bigcuat-regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+}
+
+pre.astro-code {
     display: block;
     overflow-x: auto;
     padding: 1em;
@@ -23,6 +39,20 @@ pre.astro-code code span[style="color:#6A737D"] {
         width: calc(100vw - 16rem);
         margin-left: calc(-50vw + 8rem);
     }
+}
+
+.tag {
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    rotate: -1deg;
+}
+
+.tag:nth-child(even) {
+    rotate: 1deg;
+}
+
+.tag:nth-child(3n) {
+    border-radius: 15px 255px 15px 225px / 225px 15px 255px 15px;
+    rotate: 0.5deg;
 }
 
 .visibly-hidden {

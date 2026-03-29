@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import TailwindTypography from '@tailwindcss/typography';
-
-const plugin = require('tailwindcss/plugin');
+import plugin from 'tailwindcss/plugin.js';
 
 const disabledCss = {
 	pre: false,
@@ -12,9 +11,12 @@ export default {
 	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
 	theme: {
 		extend: {
-			fontFamily: {
+			colors: {
+					accent: '#F57D00',
+				},
+				fontFamily: {
 				sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'],
-				display: ['Roboto Slab Variable', 'serif'],
+				display: ['HF Bigcuat', 'Impact', 'Arial Black', 'sans-serif'],
 			},
 			typography: {
 				DEFAULT: { css: disabledCss },

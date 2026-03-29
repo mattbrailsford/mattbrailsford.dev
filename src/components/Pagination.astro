@@ -15,7 +15,7 @@ const NextElement = nextUrl ? 'a': 'span';
     </div>
     <div class="hidden md:-mt-px md:flex">
         {paginationList.map((num) => (
-            <a href={`${num == 1 ? "/" : '/' + (num)}`} class={`inline-flex items-center border-t-2  px-4 pt-4 text-sm font-medium  ${currentPage == num ? "disabled border-pink-500 text-pink-600" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700" }`}>
+            <a href={`${num == 1 ? "/" : '/' + (num)}`} class={`inline-flex items-center border-t-2  px-4 pt-4 text-sm font-medium  ${currentPage == num ? "disabled border-accent text-accent" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700" }`}>
                 {num}
             </a>
         ))}

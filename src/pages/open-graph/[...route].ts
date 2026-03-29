@@ -48,13 +48,13 @@ export const { getStaticPaths, GET } = OGImageRoute({
             path: './public/logo-128.png',
             size: [ 120, 120 ]
         },
-        fonts: ['./src/fonts/RobotoSlab-ExtraBold.ttf'],
+        fonts: ['./src/fonts/hf-bigcuat-regular.ttf'],
         font: {
             title: {
                 color: [0,0,0],
-                families: ['Roboto Slab', 'serif'],
+                families: ['HF Bigcuat', 'serif'],
                 size: page.title.length > 65 ? 65 : 80,
-                weight: 'ExtraBold',
+                weight: 'Normal',
                 lineHeight: 1.1,
             },
             description: {

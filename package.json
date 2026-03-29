@@ -10,15 +10,16 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.4",
-    "@astrojs/rss": "^4.0.12",
-    "@astrojs/tailwind": "^6.0.2",
-    "@fontsource-variable/roboto-slab": "^5.2.6",
-    "@tailwindcss/typography": "^0.5.16",
-    "astro": "^5.13.4",
-    "canvaskit-wasm": "^0.40.0",
-    "github-discussions-blog-loader": "^1.0.5",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.9.2"
+    "@astrojs/check": "^0.9.8",
+    "@astrojs/rss": "^4.0.18",
+    "@tailwindcss/typography": "^0.5.19",
+    "astro": "^6.1.1",
+    "autoprefixer": "^10.4.27",
+    "canvaskit-wasm": "^0.41.0",
+    "deterministic-object-hash": "^2.0.2",
+    "github-discussions-blog-loader": "^2.0.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3"
   }
 }
