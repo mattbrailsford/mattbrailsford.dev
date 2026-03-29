@@ -41,12 +41,13 @@ export const { getStaticPaths, GET } = OGImageRoute({
     pages: Object.fromEntries(routables.map(routable => [ routable.slug, routable ])),
     getImageOptions: (_, page) => ({
         cacheDir: './node_modules/.astro-og-canvas-v3',
-        title: page.title,
+        title: page.title.toUpperCase(),
         description: page.description,
         bgGradient:[[255,255,255]], 
+        padding: 50,
         logo: {
             path: './public/logo-128.png',
-            size: [ 120, 120 ]
+            size: [ 160, 160 ]
         },
         fonts: ['./src/fonts/hf-bigcuat-regular.ttf'],
         font: {
@@ -55,14 +56,14 @@ export const { getStaticPaths, GET } = OGImageRoute({
                 families: ['HF Bigcuat', 'serif'],
                 size: page.title.length > 65 ? 65 : 80,
                 weight: 'Normal',
-                lineHeight: 1.1,
+                lineHeight: 1,
             },
             description: {
                 color: [200,200,200],
                 families: ['sans-serif'],
                 size: 30,
                 weight: 'Medium',
-                lineHeight: 1.1,
+                lineHeight: 1,
             }
         }
     }),
