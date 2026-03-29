@@ -29,7 +29,7 @@ const rssFeed = {
 ---
 <Layout title={`${tag}`} description={`Posts tagged #${tag}`} image={ogImageUrl.toString()} feed={rssFeed}>
     <div class="w-full py-7 md:py-8">
-        <h1 class="font-display text-4xl leading-[1.2] text-black uppercase mb-8 md:text-6xl md:text-center"><span class="visibly-hidden">Posts tagged </span>#{tag}</h1>
+        <h1 class="font-display text-4xl leading-[1.1] text-black uppercase mb-8 md:text-6xl md:leading-[1.1] md:text-center"><span class="visibly-hidden">Posts tagged </span>#{tag}</h1>
         <ul>
             {posts.map(post => (
                 <li class="py-7 border-b md:py-8">
