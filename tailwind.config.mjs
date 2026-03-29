@@ -12,7 +12,7 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-					accent: '#F57D00',
+					accent: 'oklch(65.6% 0.241 354.308)',
 				},
 				fontFamily: {
 				sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'],
